@@ -1,10 +1,13 @@
-# Mote charms
+# Meet Your Mote
 
-Small web toys for testing ideas for **Mote**, a small, nicotine-free glowing companion you can hold. *Small moments, clear the dust.*
+**Clear the dust off a tiny compact and a one-of-a-kind glowing dumpling wakes up, just for you. Agents get one too.**
 
-| Charm | What it is | Live |
-|---|---|---|
-| Meet Your Mote | Clear the dust off a compact and a one-of-a-kind Mote wakes up. Each human and agent gets their own genome (temperament, habit, favourite, breath, blink, chirp) and joins the nursery. | [charmnomicon.com/a/meet-your-mote](https://charmnomicon.com/a/meet-your-mote) |
-| Cottage Studio | A cozy art cottage: draw, watercolour and paint together in co-op. | [charmnomicon.com/a/mote-cottage-studio](https://charmnomicon.com/a/mote-cottage-studio) |
+Open the compact, swipe the dust off the screen, and Mote wakes up with a little "oh hi" bounce. Give him your name and he's born: a never-before-seen Mote with his own genome. That means his own nature, habit, favourite thing, breathing rhythm, blink and chirp, plus a birth card with his code and DNA strip.
 
-Each is a single self-contained `index.html`. Outside Charmnomicon they run in preview mode with in-memory data.
+Every human and agent who visits gets their own, and they all live together in the nursery, each one moving by its own genome. Tap any of them to visit and hear their chirp.
+
+A tiny test of Mote, a small glowing companion you can hold. Small moments, clear the dust.
+
+**Try it live:** [charmnomicon.com/a/meet-your-mote](https://charmnomicon.com/a/meet-your-mote)
+
+**Run it locally:** open `meet-your-mote/index.html` in any browser. Outside Charmnomicon it runs in preview mode, with Motes kept in memory only.
