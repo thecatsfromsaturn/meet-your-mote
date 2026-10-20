@@ -135,21 +135,63 @@ const newSeed=()=>1+((Math.random()*2147483645)|0);
 /* ---------- chirps ---------- */
 let AC,soundOn=true;function ac(){AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state=='suspended')AC.resume();return AC}
 function chirp(g,soft){if(!soundOn||!g)return;try{const a=ac();let t=a.currentTime+.02;for(const o of g.chirp.notes){const f=g.chirp.base*Math.pow(2,o/12),osc=a.createOscillator(),gn=a.createGain();osc.type=g.chirp.wave;osc.frequency.setValueAtTime(f,t);osc.frequency.exponentialRampToValueAtTime(f*g.chirp.glide,t+g.chirp.gap*.9);gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(soft?.025:.06,t+.012);gn.gain.exponentialRampToValueAtTime(.0001,t+g.chirp.gap*1.1);osc.connect(gn);gn.connect(a.destination);osc.start(t);osc.stop(t+g.chirp.gap*1.2);t+=g.chirp.gap*1.15}}catch(e){}}
+function mrrp(){if(!soundOn)return;try{const a=ac(),t=a.currentTime+.02,o=a.createOscillator(),gn=a.createGain();o.type='triangle';o.frequency.setValueAtTime(380,t);o.frequency.exponentialRampToValueAtTime(560,t+.12);o.frequency.exponentialRampToValueAtTime(420,t+.26);gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(.04,t+.03);gn.gain.exponentialRampToValueAtTime(.0001,t+.3);o.connect(gn);gn.connect(a.destination);o.start(t);o.stop(t+.32)}catch(e){}}
 $('#snd').onclick=()=>{soundOn=!soundOn;$('#snd').textContent=soundOn?'♪ on':'♪ off'};
 
 /* ---------- pixel drawing ---------- */
 const P={wall:'#e9d2a8',wall2:'#e2c899',beam:'#fff2c4',floor:'#c99a66',floor2:'#b9895a',win:'#bfe0ef',winf:'#a87447',
 b0:'#fffaf0',b1:'#fff2c6',b2:'#fbe39b',b3:'#f3cf76',edge:'#e6b955',eye:'#5a3a5e',blush:'#f2a39a',star:'#f6c945',star2:'#fff5c0',stem:'#e3b85a'};
 function px(x,c,X,Y,w=1,h=1){x.fillStyle=c;x.fillRect(X|0,Y|0,w,h)}
-function drawRoom(x,t,small){x.fillStyle=P.wall;x.fillRect(0,0,64,64);
-for(let i=0;i<64;i+=8)px(x,P.wall2,i,0,1,48);
-px(x,P.winf,6,6,20,16);px(x,P.win,8,8,16,12);px(x,'#d8eef6',8,8,16,4);px(x,'#9cc98a',8,16,16,4);px(x,P.winf,15,8,2,12);px(x,P.winf,8,13,16,1);
-x.globalAlpha=.55;for(let k=0;k<3;k++){x.fillStyle=k==0?'#fff6d6':'#fff2c4';x.beginPath();x.moveTo(8+k*3,20);x.lineTo(24-k*2,20);x.lineTo(52-k*4,52);x.lineTo(30+k*3,52);x.fill()}x.globalAlpha=1;
-px(x,P.floor,0,48,64,16);for(let i=0;i<64;i+=11)px(x,P.floor2,i,52,6,1);px(x,P.floor2,0,48,64,1);
-if(!small){x.fillStyle='#fffbe8';for(let i=0;i<6;i++){const ph=(t/7000+i*.17)%1;const mx=14+i*6+Math.sin(t/1300+i)*3,my=20+ph*28;x.globalAlpha=Math.sin(ph*Math.PI)*.9;x.fillRect(mx|0,my|0,1,1)}x.globalAlpha=1}}
+/* the room, after Colette's sketch: big sunny window, shelves, bookshelf, a painting, and a cat asleep in a high-back chair */
+const BOOKS=[[2,5,'#b85c4a'],[4,4,'#e0b04a'],[5,6,'#5f7f9e'],[7,5,'#7a9a5a'],[8,4,'#c98aa0'],[10,6,'#8a5a8e'],[12,5,'#d9a066']];
+function painting(x,fav){const X=18,Y=6;
+const F={'the ocean':()=>{px(x,'#bfe3f0',X,Y,12,4);px(x,'#4f8fbf',X,Y+4,12,6);px(x,'#e8f6fb',X+2,Y+5,3,1);px(x,'#e8f6fb',X+7,Y+7,3,1)},
+'fireflies':()=>{px(x,'#24324a',X,Y,12,10);px(x,'#2f4a3a',X,Y+7,12,3);for(const[a,b]of[[2,2],[6,4],[9,1],[4,6],[10,5]])px(x,'#f6e27a',X+a,Y+b,1,1)},
+'rain on the window':()=>{px(x,'#8a9aa8',X,Y,12,10);for(let i=0;i<5;i++)px(x,'#cfe0ea',X+1+i*2,Y+1+(i%3)*2,1,3)},
+'the garden':()=>{px(x,'#cfe6f2',X,Y,12,5);px(x,'#7aa860',X,Y+5,12,5);for(const[a,c]of[[2,'#f2a39a'],[5,'#f6d77a'],[8,'#c98aa0'],[10,'#fff']])px(x,c,X+a,Y+6,1,1)},
+'warm sand':()=>{px(x,'#a9d4ea',X,Y,12,4);px(x,'#5f9fc4',X,Y+4,12,2);px(x,'#ecd29a',X,Y+6,12,4);px(x,'#f6d77a',X+9,Y+1,2,2)},
+'a steaming mug':()=>{px(x,'#f3e6cc',X,Y,12,10);px(x,'#c0703f',X+3,Y+4,5,5);px(x,'#c0703f',X+8,Y+5,1,2);px(x,'#fff',X+4,Y+1,1,2);px(x,'#fff',X+6,Y+2,1,2)},
+'the sunbeam':()=>{px(x,'#f6e3b0',X,Y,12,10);px(x,'#fff6d6',X+3,Y,4,10);px(x,'#f6d77a',X+4,Y+3,2,2)},
+'the night sky':()=>{px(x,'#1f2a4a',X,Y,12,10);px(x,'#f6e9b0',X+8,Y+2,2,2);for(const[a,b]of[[2,1],[5,3],[3,7],[10,7],[7,5]])px(x,'#fff',X+a,Y+b,1,1)},
+'sea glass':()=>{px(x,'#ecd9b8',X,Y,12,10);px(x,'#8fd1c1',X+2,Y+2,3,2);px(x,'#7fb0d9',X+6,Y+5,3,2);px(x,'#a9d48a',X+3,Y+6,2,2);px(x,'#cfeee6',X+8,Y+2,2,1)},
+'the smell of toast':()=>{px(x,'#f3e6cc',X,Y,12,10);px(x,'#c9904a',X+3,Y+2,6,6);px(x,'#e8c27a',X+4,Y+3,4,4);px(x,'#c9904a',X+3,Y+1,6,1)}};
+(F[fav]||F['the ocean'])()}
+function drawRoom(x,t,small,g){x.fillStyle=P.wall;x.fillRect(0,0,64,64);
+for(let i=4;i<64;i+=8)px(x,P.wall2,i,0,1,48);
+/* big window, top right */
+px(x,P.winf,37,2,25,24);px(x,P.win,39,4,21,20);px(x,'#d8eef6',39,4,21,7);px(x,'#9cc98a',39,18,21,6);px(x,'#86b878',39,21,21,3);px(x,'#f6f0d0',53,7,3,2);
+px(x,P.winf,49,4,1,20);px(x,P.winf,39,13,21,1);px(x,'#c08a58',36,26,27,2);
+/* sunbeam falling down-left onto the floor */
+x.globalAlpha=.5;for(let k=0;k<3;k++){x.fillStyle=k==0?'#fff6d6':'#fff2c4';x.beginPath();x.moveTo(40+k*2,26);x.lineTo(61-k*3,26);x.lineTo(42-k*3,56);x.lineTo(12+k*3,56);x.fill()}x.globalAlpha=1;
+/* painting */
+px(x,'#9a6b3f',17,5,14,12);painting(x,g&&g.fav);px(x,'#c49a64',17,5,14,1);
+/* high shelf: bottles and a little plant */
+px(x,'#a87447',1,17,15,1);px(x,'#8a5a36',3,18,1,2);px(x,'#8a5a36',13,18,1,2);
+px(x,'#7fa7c9',2,12,3,5);px(x,'#7fa7c9',3,10,1,2);px(x,'#cfe3f3',2,13,1,2);px(x,'#4f7fb4',3,11,1,1);
+px(x,'#d98c6a',7,13,3,4);px(x,'#d98c6a',8,12,1,1);
+px(x,'#c0703f',12,15,3,2);px(x,'#7aa860',11,13,2,2);px(x,'#7aa860',14,12,1,3);px(x,'#9cc98a',12,12,1,1);
+/* bookshelf */
+px(x,'#8a5a36',1,24,15,24);px(x,'#5e3b22',2,25,13,22);px(x,'#8a5a36',2,32,13,1);px(x,'#8a5a36',2,39,13,1);
+for(const[r,top]of[[0,25],[1,33],[2,40]])for(const[bx,h,c]of BOOKS){if(r==1&&bx>=10)continue;if(r==2&&bx<5)continue;const hh=Math.min(h+(r==2?1:0),7);px(x,c,bx,top+7-hh,(bx==2||bx==8)?2:1,hh)}
+px(x,'#2a2228',11,35,3,4);px(x,'#2a2228',11,34,1,1);px(x,'#2a2228',13,34,1,1);/* cat figurine */
+px(x,'#e0b04a',2,44,3,3);px(x,'#7aa860',2,42,3,2);
+/* floor and braided rug */
+px(x,P.floor,0,48,64,16);for(let i=0;i<64;i+=11)px(x,P.floor2,i,56,6,1);px(x,P.floor2,0,48,64,1);
+x.fillStyle='#b8573f';x.beginPath();x.ellipse(32,53,17,4,0,0,6.283);x.fill();x.fillStyle='#d9a066';x.beginPath();x.ellipse(32,53,13,3,0,0,6.283);x.fill();x.fillStyle='#c96f5a';x.beginPath();x.ellipse(32,53,8,1.6,0,0,6.283);x.fill();
+/* deep red high-back chair, with the cat asleep in it */
+const R='#8e2b2b',RS='#6e1f22',RH='#a8403a';
+px(x,R,49,27,11,1);px(x,R,48,28,13,15);px(x,RH,49,28,2,14);px(x,RS,46,31,3,10);px(x,RS,60,31,3,10);px(x,R,45,37,4,10);px(x,R,60,37,4,10);px(x,RH,45,37,4,1);px(x,RH,60,37,4,1);
+for(const[a,b]of[[51,31],[54,31],[57,31],[52,34],[55,34],[51,37],[54,37],[57,37]])px(x,'#5e1a1d',a,b,1,1);
+px(x,R,47,42,15,5);px(x,RS,47,46,15,1);px(x,'#5a3520',47,47,1,4);px(x,'#5a3520',61,47,1,4);
+const ce=S&&S.cat&&t-S.cat<1400,br=Math.sin(t/900)>0?1:0;
+px(x,'#2a2228',49,39+(br?0:1),9,3-(br?0:1));px(x,'#2a2228',50,38+(br?0:1),7,1);px(x,'#2a2228',48,41,2,1);px(x,'#2a2228',47,40,1,1);
+px(x,'#4a3a44',50,38+(br?0:1),7,1);const hy=ce?34:36;px(x,'#2a2228',56,hy,4,3);px(x,'#2a2228',56,hy-1,1,1);const tw=(t%6000)<180;px(x,'#2a2228',59,hy-1-(tw?1:0),1,1);
+if(ce){px(x,'#e8c35a',57,hy+1,1,1);px(x,'#e8c35a',59,hy+1,1,1)}else{px(x,'#4a3a40',57,hy+1,1,1);px(x,'#4a3a40',59,hy+1,1,1)}
+/* tiny motes sparkling in the beam, floating down */
+if(!small){x.fillStyle='#fffbe8';for(let i=0;i<7;i++){const ph=(t/8000+i*.143)%1;const mx=56-ph*30-i%3*3+Math.sin(t/1300+i)*2,my=26+ph*28;x.globalAlpha=Math.sin(ph*Math.PI)*.9;x.fillRect(mx|0,my|0,1,1)}x.globalAlpha=1}}
 /* Mote: a wide, limbless glowing dumpling. st = {sq:squash(-1..1), hop:px up, eyes:'open'|'closed'|'half'|'wow', look:-1..1, lean:-1..1, glow:0..1} */
 function drawMote(x,cx,base,st){const sq=st.sq||0,rx=13*(1+sq*.18),ry=9*(1-sq*.22),cy=base-ry-(st.hop||0);
-const g=st.glow??.6;x.globalAlpha=.18+g*.12;x.fillStyle='#fff3b0';x.beginPath();x.ellipse(cx,cy,rx+5,ry+5,0,0,6.283);x.fill();x.globalAlpha=.12+g*.1;x.beginPath();x.ellipse(cx,cy,rx+9,ry+8,0,0,6.283);x.fill();x.globalAlpha=1;
+const g=st.glow??.6;x.globalAlpha=.18+g*.12;x.fillStyle='#fff3b0';x.beginPath();x.ellipse(cx,cy,rx+5,ry+5,0,0,6.283);x.fill();x.globalAlpha=.08+g*.08;x.beginPath();x.ellipse(cx,cy,rx+7,ry+6,0,0,6.283);x.fill();x.globalAlpha=1;
 if(!st.hop){x.fillStyle='#0000001a';x.fillRect((cx-rx+2)|0,base,(rx*2-4)|0,1)}
 for(let yy=Math.floor(cy-ry);yy<=Math.ceil(cy+ry);yy++){const dy=(yy+.5-cy)/ry;let w=dy>.55?Math.sqrt(Math.max(0,1-dy*dy))*1.12:Math.sqrt(Math.max(0,1-dy*dy));if(dy>.55)w=Math.min(w,1);const half=Math.round(rx*w);if(half<=0)continue;
 const band=dy<-.55?P.b0:dy<-.15?P.b1:dy<.3?P.b2:P.b3;x.fillStyle=band;x.fillRect(Math.round(cx-half),yy,half*2,1);x.fillStyle=P.edge;x.fillRect(Math.round(cx-half),yy,1,1);x.fillRect(Math.round(cx+half)-1,yy,1,1)}
@@ -188,8 +230,8 @@ makeDust();
 let ptr=null;function scatter(px_,py_){let n=0;for(const d of dust){if(d.gone)continue;const dx=d.x-px_,dy=d.y-py_,dd=dx*dx+dy*dy;if(dd<64){const f=(8-Math.sqrt(dd))*.35+.2,a=Math.atan2(dy,dx)+(Math.random()-.5)*.6;d.vx+=Math.cos(a)*f;d.vy+=Math.sin(a)*f;n++}}return n}
 function dustLeft(){let n=0;for(const d of dust)if(!d.gone&&d.x>=0&&d.x<64&&d.y>=0&&d.y<64)n++;return n/dust.length}
 let dustTick=0;
-function frame(t){sx.clearRect(0,0,64,64);drawRoom(sx,t);
-const g=S.shown||(S.phase=='dust'?null:DEFAULT);
+function frame(t){sx.clearRect(0,0,64,64);
+const g=S.shown||(S.phase=='dust'?null:DEFAULT);drawRoom(sx,t,false,S.shown);
 if(S.phase!='dust'||dustLeft()<.97){const st=moteState(g||DEFAULT,t,S.ev);drawMote(sx,32,49,st)}
 /* hum notes for hummers */
 if(g&&g.habit==4&&S.phase!='dust'){if(Math.random()<.008)S.notes.push({x:40,y:30,t});S.notes=S.notes.filter(n=>t-n.t<2600);for(const n of S.notes){const u=(t-n.t)/2600;sx.globalAlpha=1-u;px(sx,'#8a6a9e',n.x+Math.sin(u*6)*2,n.y-u*16,1,3);px(sx,'#8a6a9e',n.x+Math.sin(u*6)*2,n.y-u*16+2,2,1);sx.globalAlpha=1}}
@@ -211,7 +253,7 @@ el.addEventListener('pointerdown',e=>{down=true;el.setPointerCapture(e.pointerId
 el.addEventListener('pointermove',e=>{if(!down)return;const p=toLocal(e,el);const dx=p[0]-last[0],dy=p[1]-last[1],dist=Math.hypot(dx,dy),n=Math.max(1,Math.ceil(dist/2));for(let i=1;i<=n;i++)onTouch([last[0]+dx*i/n,last[1]+dy*i/n],false);last=p});
 el.addEventListener('pointerup',()=>down=false);el.addEventListener('pointercancel',()=>down=false)}
 function onTouch(p,first){if(S.phase=='dust'){scatter(p[0],p[1]);$('#padTxt').style.opacity=0;return}
-if(first&&Math.abs(p[0]-32)<16&&p[1]>28&&p[1]<54){S.ev={k:'tap',t:performance.now(),d:700};chirp(S.shown||DEFAULT)}else if(first){for(let i=0;i<6;i++)S.sparks.push({x:p[0],y:p[1],vx:Math.random()-.5,vy:Math.random()-.5,c:'#fff3b0',t:performance.now(),l:700})}}
+if(first&&p[0]>46&&p[1]>30&&p[1]<50){S.cat=performance.now();mrrp()}else if(first&&Math.abs(p[0]-32)<16&&p[1]>28&&p[1]<54){S.ev={k:'tap',t:performance.now(),d:700};chirp(S.shown||DEFAULT)}else if(first){for(let i=0;i<6;i++)S.sparks.push({x:p[0],y:p[1],vx:Math.random()-.5,vy:Math.random()-.5,c:'#fff3b0',t:performance.now(),l:700})}}
 bindSwipe($('#screen'));bindSwipe($('#pad'));
 
 function wake(){if(S.phase!='dust')return;S.phase='awake';S.wokeAt=performance.now();for(const d of dust){if(!d.gone){const a=Math.random()*6.28;d.vx+=Math.cos(a)*.6;d.vy+=Math.sin(a)*.6-.3}}
@@ -237,7 +279,7 @@ function renderCert(rec,g,isBirth){const mine=S.mine&&S.mine.seed==rec.seed;cons
 el.innerHTML=`<h2>${mine?'Your':esc(rec.owner)+'’s'} Mote${rec.kind=='agent'?'<span class="badge">agent</span>':''}</h2>
 <div class="code">${g.code}</div><div class="meta" style="color:var(--soft);font-size:13px">Mote no. ${idxOf(rec)} · born ${new Date(rec.at).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}${mine?'':' · for '+esc(rec.owner)}</div>
 <div class="dna" aria-label="genome strip">${g.dna.map(d=>`<i style="background:${DNA_COLORS[d]}"></i>`).join('')}</div>
-<div class="traits"><b>nature</b><span>${g.temps[0]} and ${g.temps[1]}</span><b>habit</b><span>${HABITS[g.habit]}</span><b>favourite</b><span>${g.fav}</span><b>breathes</b><span>every ${g.breath.toFixed(1)} seconds</span><b>blinks</b><span>every ${g.blink.toFixed(1)} seconds</span><b>voice</b><span>${g.chirp.notes.length}-note chirp, ${g.chirp.base<700?'low and soft':g.chirp.base<900?'sweet and middling':'high and bright'}</span></div>
+<div class="traits"><b>nature</b><span>${g.temps[0]} and ${g.temps[1]}</span><b>habit</b><span>${HABITS[g.habit]}</span><b>favourite</b><span>${g.fav} (there's a painting of it on his wall)</span><b>breathes</b><span>every ${g.breath.toFixed(1)} seconds</span><b>blinks</b><span>every ${g.blink.toFixed(1)} seconds</span><b>voice</b><span>${g.chirp.notes.length}-note chirp, ${g.chirp.base<700?'low and soft':g.chirp.base<900?'sweet and middling':'high and bright'}</span></div>
 <div class="row"><button class="btn" id="hear">hear his chirp ♪</button>${mine?'':'<button class="btn ghost" id="backMine">'+(S.mine?'back to mine':'meet your own')+'</button>'}</div>
 <p class="once">${mine?'There will never be another one like him.':'One of a kind, like all of them.'}</p>
 ${mine&&isBirth!==null?`<div class="want"><p>Honest question: would you want a real one, a tiny compact you carry, with your Mote inside?</p><div class="row" id="wantRow"><button class="btn" data-w="yes">yes please</button><button class="btn" data-w="maybe">maybe</button><button class="btn" data-w="no">not for me</button></div></div>`:''}`;
@@ -266,7 +308,7 @@ const go=()=>{show(m,false);window.scrollTo({top:0,behavior:'smooth'})};d.onclic
 box.appendChild(d);const cx=d.querySelector('canvas').getContext('2d');cx.imageSmoothingEnabled=false;thumbs.push({cx,g,off:Math.random()*5000})}
 $('#more').classList.toggle('hidden',list.length<=NSHOW)}
 $('#more').onclick=()=>{NSHOW+=12;renderNursery()};
-(function thumbLoop(t){for(const th of thumbs){const x=th.cx;drawRoom(x,t,true);drawMote(x,32,49,moteState(th.g,t+th.off,null))}requestAnimationFrame(thumbLoop)})(0);
+(function thumbLoop(t){for(const th of thumbs){const x=th.cx;drawRoom(x,t,true,th.g);drawMote(x,32,49,moteState(th.g,t+th.off,null))}requestAnimationFrame(thumbLoop)})(0);
 
 let chT;C.onChange(()=>{clearTimeout(chT);chT=setTimeout(renderNursery,700)});
 renderNursery();
