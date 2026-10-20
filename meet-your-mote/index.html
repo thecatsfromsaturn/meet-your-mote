@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Meet Your Mote</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&family=Patrick+Hand&family=Pixelify+Sans:wght@500&display=swap">
+<style>
+:root{--bg:#f6eedd;--ink:#4a3424;--soft:#8a6a4f;--shell:#fbf3e3;--shell2:#efe0c4;--butter:#f6d77a;--gold:#e0a92e;--plum:#5a3a5e;--line:#e2cfae}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:radial-gradient(ellipse at 50% -10%,#fff8e6 0,var(--bg) 55%,#ead9b9 100%) fixed;color:var(--ink);font:15px/1.45 Nunito,system-ui,sans-serif;min-height:100vh}
+main{max-width:520px;margin:0 auto;padding:16px 16px 40px}
+h1{font:34px/1 'Patrick Hand',cursive;text-align:center;margin:6px 0 2px}
+.sub{text-align:center;color:var(--soft);margin:0 0 14px}
+/* the compact */
+.compact{position:relative;width:min(100%,380px);margin:0 auto;user-select:none}
+.lid,.base{position:relative;width:100%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 28%,#fffaf0 0,var(--shell) 45%,var(--shell2) 100%);box-shadow:inset 0 -6px 14px #d9c39c88,inset 0 4px 10px #fff,0 10px 24px #8a6a4f33}
+.lid{transform:scaleY(.96)}
+.base{margin-top:-6%;transform:scaleY(.86);z-index:0}
+.hinge{position:relative;z-index:2;width:34%;height:16px;margin:-5% auto 0;background:linear-gradient(#efe0c4,#dcc7a0);border-radius:8px;box-shadow:0 2px 4px #8a6a4f33}
+.screen{position:absolute;left:17%;top:17%;width:66%;aspect-ratio:1;border-radius:14%;overflow:hidden;background:#2a2016;box-shadow:inset 0 0 0 5px #e8d6b4,inset 0 0 0 7px #cdb48a,0 0 0 2px #fff8;touch-action:none;cursor:grab}
+#scr{width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;display:block}
+.screen::after{content:"";position:absolute;inset:0;border-radius:14%;pointer-events:none;background:linear-gradient(140deg,#ffffff22 0,transparent 35%),repeating-linear-gradient(#0000 0 2px,#0000000a 2px 3px)}
+.pad{position:absolute;left:22%;top:20%;width:56%;height:56%;border-radius:22%;background:radial-gradient(circle at 40% 30%,#fffdf6,#f1e4c8);box-shadow:inset 0 2px 6px #c9b28a99,inset 0 -2px 4px #fff;touch-action:none;cursor:grab}
+.pad span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:16px 'Patrick Hand';color:#b9a079;pointer-events:none;transition:opacity .6s}
+.dip{position:absolute;left:50%;top:8%;width:22%;height:9%;transform:translateX(-50%);border-radius:50%;background:radial-gradient(#e6d4b2,#f6ead2);box-shadow:inset 0 2px 4px #c9b28a}
+/* panels */
+.panel{background:#fffaf0;border:2px solid var(--line);border-radius:18px;padding:16px;margin:16px auto 0;max-width:420px;box-shadow:0 6px 18px #8a6a4f1a}
+.panel h2{font:26px/1.1 'Patrick Hand';margin:0 0 6px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+input{flex:1;min-width:150px;font:16px Nunito;padding:9px 12px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+.btn{font:800 14px Nunito;color:var(--ink);background:#fffaf0;border:2px solid #b98a5a;border-radius:999px;padding:8px 14px;cursor:pointer;box-shadow:0 2px 0 #b98a5a}
+.btn:active{transform:translateY(2px);box-shadow:none}
+.btn.pri{background:var(--butter)}
+.btn.ghost{border-color:var(--line);box-shadow:none;font-weight:700}
+.btn:disabled{opacity:.5}
+.link{background:none;border:0;color:var(--soft);text-decoration:underline;cursor:pointer;font:14px Nunito;padding:4px}
+.hidden{display:none!important}
+/* birth card */
+.cert .code{font:500 18px 'Pixelify Sans',monospace;letter-spacing:1px;color:var(--plum)}
+.dna{display:flex;height:14px;border-radius:4px;overflow:hidden;margin:8px 0 10px;box-shadow:inset 0 0 0 1px #0001}
+.dna i{flex:1}
+.traits{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+.traits b{color:var(--soft);font-weight:700}
+.once{font:20px/1.2 'Patrick Hand';text-align:center;margin:12px 0 2px;color:#7a5a3a}
+.want{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.want p{margin:0 0 6px;font-size:14px}
+.want .btn.on{background:var(--butter)}
+/* nursery */
+.nursery{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px;margin-top:10px}
+.nm{background:#fff;border:2px solid var(--line);border-radius:14px;padding:6px;text-align:center;cursor:pointer;transition:transform .2s}
+.nm:hover{transform:translateY(-3px)}
+.nm canvas{width:100%;aspect-ratio:1;image-rendering:pixelated;border-radius:10px;display:block;background:#e9d2a8}
+.nm .who{font-weight:800;font-size:13px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nm .cd{font:500 10px 'Pixelify Sans',monospace;color:var(--soft)}
+.badge{font-size:9px;font-weight:800;background:#cfe3f3;color:#2f5a7a;border-radius:5px;padding:0 4px;margin-left:3px;vertical-align:1px}
+.toast{position:fixed;left:50%;bottom:18px;transform:translate(-50%,20px);background:#4a3424ee;color:#fffaf0;font:17px 'Patrick Hand';padding:8px 16px;border-radius:999px;opacity:0;transition:.3s;pointer-events:none;z-index:9;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.snd{position:fixed;right:12px;top:12px;z-index:5}
+footer{text-align:center;font-size:12px;color:var(--soft);margin-top:22px}
+#prev{position:fixed;left:8px;bottom:8px;font-size:11px;background:#fff8;padding:2px 8px;border-radius:8px;display:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<button class="btn ghost snd" id="snd" aria-label="Sound">♪ on</button>
+<main>
+<h1>Meet your Mote</h1>
+<p class="sub" id="hint">Clear the dust to see who's inside.</p>
+
+<div class="compact" aria-label="A Mote compact, open">
+<div class="lid"><div class="dip"></div><div class="screen" id="screen"><canvas id="scr" width="64" height="64" aria-label="Mote's screen"></canvas></div></div>
+<div class="hinge"></div>
+<div class="base"><div class="pad" id="pad"><span id="padTxt">swipe here</span></div></div>
+</div>
+
+<section class="panel hidden" id="pHello">
+<h2>Oh hi!</h2>
+<p>He just woke up, and he's never existed before. Give him someone to belong to.</p>
+<div class="row"><input id="name" maxlength="24" placeholder="your name" autocomplete="nickname"><button class="btn pri" id="born">meet him ✦</button></div>
+<button class="link" id="haveOne">I already have a Mote</button>
+</section>
+
+<section class="panel hidden" id="pFind">
+<h2>Find your Mote</h2>
+<div class="row"><input id="fname" maxlength="24" placeholder="the name you used"><button class="btn pri" id="findGo">find</button></div>
+<div id="found"></div>
+<button class="link" id="backNew">no, I'm new here</button>
+</section>
+
+<section class="panel cert hidden" id="pCert"></section>
+
+<section class="panel" id="pNursery">
+<h2>The nursery</h2>
+<p class="sub" style="text-align:left;margin:0" id="nCount">Every Mote here was born for someone, human or agent. No two are alike.</p>
+<div class="nursery" id="nursery"></div>
+<div class="row" style="justify-content:center"><button class="btn ghost hidden" id="more">show more</button></div>
+</section>
+
+<footer>A tiny test of <b>Mote</b>, a small glowing companion you can hold. · small moments, clear the dust</footer>
+</main>
+<div class="toast" id="toast"></div>
+<div id="prev">preview mode</div>
+
+<script>
+/* ---------- shared data (window.charm on Charmnomicon; in-memory mock for previews) ---------- */
+if(!window.charm){const m=new Map(),ls=new Set(),fire=()=>ls.forEach(f=>{try{f()}catch(e){}});
+window.charm={async get(k){return m.has(k)?JSON.parse(m.get(k)):null},async set(k,v){m.set(k,JSON.stringify(v));setTimeout(fire,30)},async del(k){m.delete(k);setTimeout(fire,30)},
+async list(p=''){return[...m].filter(([k])=>k.startsWith(p)).map(([k,v])=>({key:k,value:JSON.parse(v)}))},async all(p=''){const o={};for(const[k,v]of m)if(k.startsWith(p))o[k]=JSON.parse(v);return o},onChange(cb){ls.add(cb);return()=>ls.delete(cb)}};
+document.getElementById('prev').style.display='block'}
+const C=window.charm;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let tT;function toast(t,ms=2600){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>e.classList.remove('on'),ms)}
+function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ---------- the genome: everything about a Mote's personality comes from one seed ---------- */
+const TEMPS=['curious','sleepy','bouncy','mellow','shy','brave','dreamy','giggly','gentle','stubborn','chatty','thoughtful'];
+const HABITS=['sways side to side','looks all around','does little hops','dozes off','hums to himself','tilts his head'];
+const FAVS=['the ocean','fireflies','rain on the window','the garden','warm sand','a steaming mug','the sunbeam','the night sky','sea glass','the smell of toast'];
+const PENTA=[0,2,4,7,9,12,14,16];
+function genome(seed){const r=mulberry(seed);const pick=a=>a[(r()*a.length)|0];
+const t1=pick(TEMPS);let t2=pick(TEMPS);while(t2==t1)t2=pick(TEMPS);
+const n=2+((r()*4)|0),notes=[];for(let i=0;i<n;i++)notes.push(PENTA[(r()*PENTA.length)|0]);
+const hx=(seed>>>0).toString(16).toUpperCase().padStart(8,'0');
+return{seed,code:'MO-'+hx.slice(0,4)+'-'+hx.slice(4),temps:[t1,t2],habit:(r()*HABITS.length)|0,fav:pick(FAVS),
+blink:2.2+r()*5,bounce:.55+r()*.9,breath:3.4+r()*2.4,tilt:r()<.5?-1:1,
+chirp:{base:480+r()*560,notes,wave:r()<.5?'sine':'triangle',gap:.07+r()*.09,glide:1.04+r()*.12},
+dna:Array.from({length:24},()=>(r()*6)|0)}}
+const DNA_COLORS=['#f6d77a','#fbf0d4','#f2a39a','#5a3a5e','#e0a92e','#a9cfe0'];
+const newSeed=()=>1+((Math.random()*2147483645)|0);
+
+/* ---------- chirps ---------- */
+let AC,soundOn=true;function ac(){AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state=='suspended')AC.resume();return AC}
+function chirp(g,soft){if(!soundOn||!g)return;try{const a=ac();let t=a.currentTime+.02;for(const o of g.chirp.notes){const f=g.chirp.base*Math.pow(2,o/12),osc=a.createOscillator(),gn=a.createGain();osc.type=g.chirp.wave;osc.frequency.setValueAtTime(f,t);osc.frequency.exponentialRampToValueAtTime(f*g.chirp.glide,t+g.chirp.gap*.9);gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(soft?.025:.06,t+.012);gn.gain.exponentialRampToValueAtTime(.0001,t+g.chirp.gap*1.1);osc.connect(gn);gn.connect(a.destination);osc.start(t);osc.stop(t+g.chirp.gap*1.2);t+=g.chirp.gap*1.15}}catch(e){}}
+$('#snd').onclick=()=>{soundOn=!soundOn;$('#snd').textContent=soundOn?'♪ on':'♪ off'};
+
+/* ---------- pixel drawing ---------- */
+const P={wall:'#e9d2a8',wall2:'#e2c899',beam:'#fff2c4',floor:'#c99a66',floor2:'#b9895a',win:'#bfe0ef',winf:'#a87447',
+b0:'#fffaf0',b1:'#fff2c6',b2:'#fbe39b',b3:'#f3cf76',edge:'#e6b955',eye:'#5a3a5e',blush:'#f2a39a',star:'#f6c945',star2:'#fff5c0',stem:'#e3b85a'};
+function px(x,c,X,Y,w=1,h=1){x.fillStyle=c;x.fillRect(X|0,Y|0,w,h)}
+function drawRoom(x,t,small){x.fillStyle=P.wall;x.fillRect(0,0,64,64);
+for(let i=0;i<64;i+=8)px(x,P.wall2,i,0,1,48);
+px(x,P.winf,6,6,20,16);px(x,P.win,8,8,16,12);px(x,'#d8eef6',8,8,16,4);px(x,'#9cc98a',8,16,16,4);px(x,P.winf,15,8,2,12);px(x,P.winf,8,13,16,1);
+x.globalAlpha=.55;for(let k=0;k<3;k++){x.fillStyle=k==0?'#fff6d6':'#fff2c4';x.beginPath();x.moveTo(8+k*3,20);x.lineTo(24-k*2,20);x.lineTo(52-k*4,52);x.lineTo(30+k*3,52);x.fill()}x.globalAlpha=1;
+px(x,P.floor,0,48,64,16);for(let i=0;i<64;i+=11)px(x,P.floor2,i,52,6,1);px(x,P.floor2,0,48,64,1);
+if(!small){x.fillStyle='#fffbe8';for(let i=0;i<6;i++){const ph=(t/7000+i*.17)%1;const mx=14+i*6+Math.sin(t/1300+i)*3,my=20+ph*28;x.globalAlpha=Math.sin(ph*Math.PI)*.9;x.fillRect(mx|0,my|0,1,1)}x.globalAlpha=1}}
+/* Mote: a wide, limbless glowing dumpling. st = {sq:squash(-1..1), hop:px up, eyes:'open'|'closed'|'half'|'wow', look:-1..1, lean:-1..1, glow:0..1} */
+function drawMote(x,cx,base,st){const sq=st.sq||0,rx=13*(1+sq*.18),ry=9*(1-sq*.22),cy=base-ry-(st.hop||0);
+const g=st.glow??.6;x.globalAlpha=.18+g*.12;x.fillStyle='#fff3b0';x.beginPath();x.ellipse(cx,cy,rx+5,ry+5,0,0,6.283);x.fill();x.globalAlpha=.12+g*.1;x.beginPath();x.ellipse(cx,cy,rx+9,ry+8,0,0,6.283);x.fill();x.globalAlpha=1;
+if(!st.hop){x.fillStyle='#0000001a';x.fillRect((cx-rx+2)|0,base,(rx*2-4)|0,1)}
+for(let yy=Math.floor(cy-ry);yy<=Math.ceil(cy+ry);yy++){const dy=(yy+.5-cy)/ry;let w=dy>.55?Math.sqrt(Math.max(0,1-dy*dy))*1.12:Math.sqrt(Math.max(0,1-dy*dy));if(dy>.55)w=Math.min(w,1);const half=Math.round(rx*w);if(half<=0)continue;
+const band=dy<-.55?P.b0:dy<-.15?P.b1:dy<.3?P.b2:P.b3;x.fillStyle=band;x.fillRect(Math.round(cx-half),yy,half*2,1);x.fillStyle=P.edge;x.fillRect(Math.round(cx-half),yy,1,1);x.fillRect(Math.round(cx+half)-1,yy,1,1)}
+x.fillStyle=P.edge;x.fillRect(Math.round(cx-rx*.85),Math.round(cy+ry)-1,Math.round(rx*1.7),1);
+x.fillStyle='#ffffff';x.globalAlpha=.7;x.fillRect(Math.round(cx-rx*.45),Math.round(cy-ry*.7),3,1);x.globalAlpha=1;
+const lean=(st.lean||0),sx=Math.round(cx+lean),top=Math.round(cy-ry);px(x,P.stem,sx,top-6,1,6);
+const sy=top-9;px(x,P.star,sx-1,sy,3,3);px(x,P.star,sx,sy-1,1,5);px(x,P.star,sx-2,sy+1,5,1);px(x,P.star2,sx,sy+1,1,1);
+const ex=Math.round(cx+(st.look||0)),ey=Math.round(cy-1),L=ex-5,R=ex+3;const e=st.eyes||'open';
+if(e=='closed'){px(x,P.eye,L,ey+1,3,1);px(x,P.eye,R,ey+1,3,1)}else if(e=='half'){px(x,P.eye,L,ey+1,3,2);px(x,P.eye,R,ey+1,3,2)}
+else{const h=e=='wow'?4:3;px(x,P.eye,L,ey-1,3,h);px(x,P.eye,R,ey-1,3,h);px(x,'#fff',L,ey-1,1,1);px(x,'#fff',R,ey-1,1,1);px(x,'#fff',L+2,ey+1,1,1);px(x,'#fff',R+2,ey+1,1,1)}
+px(x,P.blush,L-2,ey+3,2,1);px(x,P.blush,R+3,ey+3,2,1);
+if(e=='wow'){px(x,'#7a3a3a',ex-1,ey+4,2,2)}else{px(x,'#7a4a4a',ex-1,ey+4,1,1);px(x,'#7a4a4a',ex,ey+5,1,1);px(x,'#7a4a4a',ex+1,ey+4,1,1)}}
+
+/* ---------- behaviour: a genome drives how a Mote moves ---------- */
+function moteState(g,t,ev){const s={sq:0,hop:0,eyes:'open',look:0,lean:0,glow:.6};if(!g)return s;
+const tt=t/1000,br=Math.sin(tt*2*Math.PI/g.breath);s.sq=br*.18;s.glow=.55+br*.2;
+const bl=(tt+g.seed%7)%g.blink;if(bl<.14)s.eyes='closed';
+switch(g.habit){case 0:s.lean=Math.round(Math.sin(tt*1.3)*1.6);break;
+case 1:{const k=Math.floor(tt/2.4)%4;s.look=[0,-1,0,1][k];break}
+case 2:{const k=(tt%4.8)/4.8;if(k<.18){const u=k/.18;s.hop=Math.round(Math.sin(u*Math.PI)*4*g.bounce);s.sq=u<.2?.5:-.3}break}
+case 3:{const k=(tt%14)/14;if(k>.55&&k<.9)s.eyes='closed';else if(k>.45&&k<.97)s.eyes=s.eyes=='closed'?'closed':'half';break}
+case 4:break;
+case 5:s.lean=g.tilt*2;s.look=g.tilt;break}
+if(ev){const u=(t-ev.t)/ev.d;if(u<1){if(ev.k=='ohhi'){if(u<.15)s.sq=.6*(u/.15);else if(u<.45){const v=(u-.15)/.3;s.hop=Math.round(Math.sin(v*Math.PI)*12*(g.bounce||1));s.sq=-.5*Math.sin(v*Math.PI)}else if(u<.62)s.sq=.7*Math.sin((u-.45)/.17*Math.PI);s.eyes=u>.15&&u<.6?'wow':'open';s.glow=1}
+else if(ev.k=='tap'){const sh=g.temps.includes('shy'),bo=g.temps.includes('bouncy')||g.temps.includes('giggly');if(sh){s.sq=.5*Math.sin(u*Math.PI);s.eyes='closed'}else{s.hop=Math.round(Math.sin(u*Math.PI)*(bo?10:5)*g.bounce);s.sq=-.3*Math.sin(u*Math.PI);s.eyes='wow'}s.glow=1}
+else if(ev.k=='born'){s.glow=1;s.eyes=u<.5?'wow':'open';s.hop=Math.round(Math.sin(u*Math.PI*2)*3)}}}
+return s}
+
+/* ---------- the main screen ---------- */
+const scr=$('#scr'),sx=scr.getContext('2d');sx.imageSmoothingEnabled=false;
+const S={phase:'dust',g:null,ev:null,mine:null,shown:null,notes:[],sparks:[]};
+const DEFAULT={seed:1,temps:['curious','gentle'],habit:4,blink:3.5,bounce:1,breath:4.4,tilt:1,chirp:{base:700,notes:[0,4,7],wave:'sine',gap:.1,glide:1.08}};
+/* dust */
+let dust=[];function makeDust(){dust=[];const cols=['#b9ad99','#cfc4b0','#a89c88','#d9cfbd','#968a77'];for(let i=0;i<2300;i++)dust.push({x:Math.random()*64,y:Math.random()*64,vx:0,vy:0,c:cols[(Math.random()*cols.length)|0],s:Math.random()<.3?2:1,dw:Math.random()*6.28,gone:false})}
+makeDust();
+let ptr=null;function scatter(px_,py_){let n=0;for(const d of dust){if(d.gone)continue;const dx=d.x-px_,dy=d.y-py_,dd=dx*dx+dy*dy;if(dd<64){const f=(8-Math.sqrt(dd))*.35+.2,a=Math.atan2(dy,dx)+(Math.random()-.5)*.6;d.vx+=Math.cos(a)*f;d.vy+=Math.sin(a)*f;n++}}return n}
+function dustLeft(){let n=0;for(const d of dust)if(!d.gone&&d.x>=0&&d.x<64&&d.y>=0&&d.y<64)n++;return n/dust.length}
+let dustTick=0;
+function frame(t){sx.clearRect(0,0,64,64);drawRoom(sx,t);
+const g=S.shown||(S.phase=='dust'?null:DEFAULT);
+if(S.phase!='dust'||dustLeft()<.97){const st=moteState(g||DEFAULT,t,S.ev);drawMote(sx,32,49,st)}
+/* hum notes for hummers */
+if(g&&g.habit==4&&S.phase!='dust'){if(Math.random()<.008)S.notes.push({x:40,y:30,t});S.notes=S.notes.filter(n=>t-n.t<2600);for(const n of S.notes){const u=(t-n.t)/2600;sx.globalAlpha=1-u;px(sx,'#8a6a9e',n.x+Math.sin(u*6)*2,n.y-u*16,1,3);px(sx,'#8a6a9e',n.x+Math.sin(u*6)*2,n.y-u*16+2,2,1);sx.globalAlpha=1}}
+if(g&&g.habit==3&&S.phase!='dust'){const k=(t/1000%14)/14;if(k>.55&&k<.9){const u=((t/1000)%2)/2;sx.globalAlpha=1-u;px(sx,'#8a6a4f',42+u*4,28-u*8,2,1);px(sx,'#8a6a4f',43+u*4,29-u*8,1,1);px(sx,'#8a6a4f',42+u*4,30-u*8,2,1);sx.globalAlpha=1}}
+/* sparkles */
+S.sparks=S.sparks.filter(p=>t-p.t<p.l);for(const p of S.sparks){const u=(t-p.t)/p.l;sx.globalAlpha=1-u;px(sx,p.c,p.x+p.vx*u*20,p.y+p.vy*u*20,1,1);sx.globalAlpha=1}
+/* dust on top */
+if(S.phase=='dust'||dust.some(d=>!d.gone)){for(const d of dust){if(d.gone)continue;d.x+=d.vx;d.y+=d.vy;d.vx*=.88;d.vy*=.88;
+if(S.phase!='dust'){d.vy+=.09;d.vx+=(Math.random()-.5)*.08;d.vx*=1.08;d.vy*=1.08}
+if(d.x<-3||d.x>67||d.y<-3||d.y>67){d.gone=true;continue}
+const wob=Math.sin(t/900+d.dw)*.15;const fa=S.wokeAt?Math.max(0,1-(t-S.wokeAt)/1400):1;if(fa<=0){d.gone=true;continue}sx.globalAlpha=fa;sx.fillStyle=d.c;sx.fillRect((d.x+wob)|0,d.y|0,d.s,d.s);sx.globalAlpha=1}}
+if(S.phase=='dust'&&++dustTick%10==0&&dustLeft()<.32)wake();
+requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+
+function toLocal(e,el){const r=el.getBoundingClientRect();return[(e.clientX-r.left)/r.width*64,(e.clientY-r.top)/r.height*64]}
+function bindSwipe(el){let down=false,last=null;
+el.addEventListener('pointerdown',e=>{down=true;el.setPointerCapture(e.pointerId);last=toLocal(e,el);ac();onTouch(last,true)});
+el.addEventListener('pointermove',e=>{if(!down)return;const p=toLocal(e,el);const dx=p[0]-last[0],dy=p[1]-last[1],dist=Math.hypot(dx,dy),n=Math.max(1,Math.ceil(dist/2));for(let i=1;i<=n;i++)onTouch([last[0]+dx*i/n,last[1]+dy*i/n],false);last=p});
+el.addEventListener('pointerup',()=>down=false);el.addEventListener('pointercancel',()=>down=false)}
+function onTouch(p,first){if(S.phase=='dust'){scatter(p[0],p[1]);$('#padTxt').style.opacity=0;return}
+if(first&&Math.abs(p[0]-32)<16&&p[1]>28&&p[1]<54){S.ev={k:'tap',t:performance.now(),d:700};chirp(S.shown||DEFAULT)}else if(first){for(let i=0;i<6;i++)S.sparks.push({x:p[0],y:p[1],vx:Math.random()-.5,vy:Math.random()-.5,c:'#fff3b0',t:performance.now(),l:700})}}
+bindSwipe($('#screen'));bindSwipe($('#pad'));
+
+function wake(){if(S.phase!='dust')return;S.phase='awake';S.wokeAt=performance.now();for(const d of dust){if(!d.gone){const a=Math.random()*6.28;d.vx+=Math.cos(a)*.6;d.vy+=Math.sin(a)*.6-.3}}
+S.ev={k:'ohhi',t:performance.now()+250,d:1600};setTimeout(()=>chirp(DEFAULT),650);
+$('#hint').textContent="Oh hi! He's never existed before.";$('#padTxt').textContent='tap him';$('#padTxt').style.opacity=1;
+setTimeout(()=>{$('#pHello').classList.remove('hidden');$('#pHello').scrollIntoView({behavior:'smooth',block:'center'})},1300)}
+
+/* ---------- birth ---------- */
+let MOTES={};
+async function loadMotes(){try{MOTES=await C.all('mote:')}catch(e){MOTES={}}return MOTES}
+function codesInUse(){return new Set(Object.values(MOTES).map(m=>genome(m.seed).code))}
+$('#born').onclick=async()=>{const n=$('#name').value.trim().slice(0,24);if(!n){$('#name').focus();toast('Give him a name to belong to');return}
+$('#born').disabled=true;await loadMotes();const used=codesInUse();let seed=newSeed();while(used.has(genome(seed).code))seed=newSeed();
+const id=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6);const rec={owner:n,kind:'human',seed,at:Date.now()};
+try{await C.set('mote:'+id,rec)}catch(e){toast("He couldn't be saved just now. Try again?");$('#born').disabled=false;return}
+S.mine={id,...rec};show(S.mine,true);$('#pHello').classList.add('hidden');renderNursery()};
+$('#name').addEventListener('keydown',e=>{if(e.key=='Enter')$('#born').click()});
+function show(rec,isBirth){const g=genome(rec.seed);S.g=g;S.shown=g;S.ev={k:isBirth?'born':'ohhi',t:performance.now(),d:isBirth?1400:1600};chirp(g);
+for(let i=0;i<40;i++)S.sparks.push({x:32,y:40,vx:Math.cos(i)*(.5+Math.random()),vy:Math.sin(i)*(.5+Math.random()),c:i%2?'#fff3b0':'#f6c945',t:performance.now(),l:900+Math.random()*600});
+renderCert(rec,g,isBirth);$('#hint').textContent=isBirth?`${rec.owner}'s Mote was just born.`:`Visiting ${rec.owner}'s Mote.`;}
+function idxOf(rec){const l=Object.values(MOTES).sort((a,b)=>a.at-b.at);const i=l.findIndex(m=>m.seed==rec.seed);return i<0?l.length:i+1}
+function renderCert(rec,g,isBirth){const mine=S.mine&&S.mine.seed==rec.seed;const el=$('#pCert');el.classList.remove('hidden');
+el.innerHTML=`<h2>${mine?'Your':esc(rec.owner)+'’s'} Mote${rec.kind=='agent'?'<span class="badge">agent</span>':''}</h2>
+<div class="code">${g.code}</div><div class="meta" style="color:var(--soft);font-size:13px">Mote no. ${idxOf(rec)} · born ${new Date(rec.at).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}${mine?'':' · for '+esc(rec.owner)}</div>
+<div class="dna" aria-label="genome strip">${g.dna.map(d=>`<i style="background:${DNA_COLORS[d]}"></i>`).join('')}</div>
+<div class="traits"><b>nature</b><span>${g.temps[0]} and ${g.temps[1]}</span><b>habit</b><span>${HABITS[g.habit]}</span><b>favourite</b><span>${g.fav}</span><b>breathes</b><span>every ${g.breath.toFixed(1)} seconds</span><b>blinks</b><span>every ${g.blink.toFixed(1)} seconds</span><b>voice</b><span>${g.chirp.notes.length}-note chirp, ${g.chirp.base<700?'low and soft':g.chirp.base<900?'sweet and middling':'high and bright'}</span></div>
+<div class="row"><button class="btn" id="hear">hear his chirp ♪</button>${mine?'':'<button class="btn ghost" id="backMine">'+(S.mine?'back to mine':'meet your own')+'</button>'}</div>
+<p class="once">${mine?'There will never be another one like him.':'One of a kind, like all of them.'}</p>
+${mine&&isBirth!==null?`<div class="want"><p>Honest question: would you want a real one, a tiny compact you carry, with your Mote inside?</p><div class="row" id="wantRow"><button class="btn" data-w="yes">yes please</button><button class="btn" data-w="maybe">maybe</button><button class="btn" data-w="no">not for me</button></div></div>`:''}`;
+$('#hear').onclick=()=>{ac();chirp(g);S.ev={k:'tap',t:performance.now(),d:700}};
+const bm=$('#backMine');if(bm)bm.onclick=()=>{if(S.mine)show(S.mine,false);else{$('#pCert').classList.add('hidden');S.shown=null;$('#pHello').classList.remove('hidden');$('#hint').textContent='Meet your own Mote.'}window.scrollTo({top:0,behavior:'smooth'})};
+const wr=$('#wantRow');if(wr)wr.querySelectorAll('button').forEach(b=>b.onclick=async()=>{wr.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x==b));try{await C.set('mote:'+S.mine.id,{owner:S.mine.owner,kind:'human',seed:S.mine.seed,at:S.mine.at,want:b.dataset.w});toast(b.dataset.w=='yes'?'Noted, thank you! ✦':'Thank you for telling us.')}catch(e){}});
+if(isBirth)el.scrollIntoView({behavior:'smooth',block:'start'})}
+
+/* ---------- find an existing Mote ---------- */
+$('#haveOne').onclick=()=>{$('#pHello').classList.add('hidden');$('#pFind').classList.remove('hidden');$('#fname').focus()};
+$('#backNew').onclick=()=>{$('#pFind').classList.add('hidden');$('#pHello').classList.remove('hidden')};
+$('#findGo').onclick=async()=>{const q=$('#fname').value.trim().toLowerCase();if(!q)return;await loadMotes();
+const hits=Object.entries(MOTES).filter(([k,m])=>String(m.owner||'').toLowerCase()==q).map(([k,m])=>({id:k.slice(5),...m}));
+$('#found').innerHTML=hits.length?hits.map((m,i)=>`<button class="btn" style="margin:6px 6px 0 0" data-i="${i}">${genome(m.seed).code}</button>`).join(''):'<p class="sub" style="text-align:left">No Mote under that name yet. Maybe meet a new one?</p>';
+$('#found').querySelectorAll('button').forEach(b=>b.onclick=()=>{S.mine=hits[+b.dataset.i];$('#pFind').classList.add('hidden');show(S.mine,null)})};
+$('#fname').addEventListener('keydown',e=>{if(e.key=='Enter')$('#findGo').click()});
+
+/* ---------- the nursery: everyone's Mote, each moving by its own genome ---------- */
+let NSHOW=12,thumbs=[];
+async function renderNursery(){await loadMotes();const list=Object.entries(MOTES).filter(([k,m])=>m&&Number.isFinite(m.seed)).map(([k,m])=>({id:k.slice(5),...m})).sort((a,b)=>b.at-a.at);
+$('#nCount').textContent=list.length?`${list.length} Mote${list.length==1?'':'s'} born so far, for humans and agents. No two are alike.`:'No Motes yet. Yours could be the very first.';
+const box=$('#nursery');box.innerHTML='';thumbs=[];
+for(const m of list.slice(0,NSHOW)){const g=genome(m.seed);const d=document.createElement('div');d.className='nm';d.tabIndex=0;d.setAttribute('role','button');d.setAttribute('aria-label',`${m.owner}'s Mote`);
+d.innerHTML=`<canvas width="64" height="64"></canvas><div class="who">${esc(m.owner)}${m.kind=='agent'?'<span class="badge">agent</span>':''}</div><div class="cd">${g.code}</div>`;
+const go=()=>{show(m,false);window.scrollTo({top:0,behavior:'smooth'})};d.onclick=go;d.onkeydown=e=>{if(e.key=='Enter')go()};
+box.appendChild(d);const cx=d.querySelector('canvas').getContext('2d');cx.imageSmoothingEnabled=false;thumbs.push({cx,g,off:Math.random()*5000})}
+$('#more').classList.toggle('hidden',list.length<=NSHOW)}
+$('#more').onclick=()=>{NSHOW+=12;renderNursery()};
+(function thumbLoop(t){for(const th of thumbs){const x=th.cx;drawRoom(x,t,true);drawMote(x,32,49,moteState(th.g,t+th.off,null))}requestAnimationFrame(thumbLoop)})(0);
+
+let chT;C.onChange(()=>{clearTimeout(chT);chT=setTimeout(renderNursery,700)});
+renderNursery();
+</script>
+</body>
+</html>
