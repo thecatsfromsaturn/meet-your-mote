@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mote Cottage Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&family=Patrick+Hand&display=swap">
+<style>
+:root{--cream:#fbf6ea;--paper:#fffaf0;--ink:#4a3424;--soft:#8a6a4f;--wood:#b98455;--woodd:#8a5a36;--butter:#f6d77a;--gold:#e0a92e;--rose:#d98a8a;--sky:#bfe3ef}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{background:radial-gradient(ellipse at 50% 0%,#5a3a26 0,#2e1c12 60%,#1c110a 100%);color:var(--ink);font:15px/1.4 Nunito,system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+#wrap{width:min(100vw,calc((100vh - 40px)*0.8),760px);position:relative;margin:8px auto 0}
+#viewport{position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;border-radius:18px;box-shadow:0 18px 50px #00000088,0 0 0 6px #6b4a32}
+#rooms{position:absolute;inset:0;display:flex;width:200%;transition:transform .9s cubic-bezier(.6,.05,.3,1)}
+#rooms.gal{transform:translateX(-50%)}
+.room{position:relative;width:50%;height:100%;flex:none}
+.room>svg.scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hit{cursor:pointer}
+.hit:focus{outline:none}
+.hit:focus-visible{filter:drop-shadow(0 0 6px #fff)}
+.tool{transition:transform .35s ease;transform-box:fill-box;transform-origin:center}
+.tool:hover{transform:translateY(-4px)}
+.tool.held{animation:float 1.6s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(-16px)}50%{transform:translateY(-22px)}}
+.tool.pop{animation:pop .5s ease}
+@keyframes pop{40%{transform:translateY(-14px)}}
+.sign{transform-box:view-box}
+.sign:hover .board{animation:swing 1.2s ease-in-out}
+@keyframes swing{25%{transform:rotate(4deg)}60%{transform:rotate(-3deg)}}
+.board{transform-box:view-box}
+#cv{position:absolute;left:8.5%;top:20.2%;width:83%;height:49.8%;touch-action:none;border-radius:2px;background:var(--cream)}
+#cv.armed{cursor:none}
+#beamS,#beamG{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:.42}
+#beamS{background:linear-gradient(135deg,#fff1b8cc 0,#ffe39a55 35%,transparent 70%);clip-path:polygon(34% 2%,66% 2%,100% 58%,100% 88%,62% 92%)}
+#beamG{background:linear-gradient(120deg,#fff1b8bb 0,#ffe39a44 40%,transparent 75%);clip-path:polygon(0 0,30% 0,95% 90%,55% 100%,0 60%)}
+.motes{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.motes i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fffbe8;box-shadow:0 0 6px 2px #fff3c4;opacity:0;animation:drift linear infinite}
+@keyframes drift{0%{opacity:0;transform:translate(0,0)}15%{opacity:.9}85%{opacity:.7}100%{opacity:0;transform:translate(40px,120px)}}
+#ghost{position:absolute;width:76px;height:76px;pointer-events:none;z-index:6;display:none;filter:drop-shadow(3px 6px 4px #5a3a2266)}
+#ghost .drops{position:absolute;left:30px;top:-2px;font-size:11px;color:#3e8db3;font-weight:800;text-shadow:0 0 3px #fff}
+/* ledge row */
+.ledge{position:absolute;left:7%;right:7%;top:70.6%;height:6.4%;display:flex;align-items:center;gap:6px;z-index:5}
+.ledge .sp{flex:1}
+.btn{font:700 13px Nunito;color:var(--ink);background:var(--paper);border:2px solid var(--woodd);border-radius:999px;padding:5px 12px;cursor:pointer;box-shadow:0 2px 0 var(--woodd);white-space:nowrap}
+.btn:active{transform:translateY(2px);box-shadow:none}
+.btn.pri{background:var(--butter)}
+.btn:disabled{opacity:.45;cursor:default}
+.hand{font-family:'Patrick Hand',cursive}
+/* top tags */
+.tags{position:absolute;left:2.5%;top:1.6%;display:flex;gap:6px;z-index:7}
+.tag{font:700 13px Nunito;background:#e6c491;border:2px solid var(--woodd);border-radius:8px;padding:4px 10px;cursor:pointer;color:var(--ink);box-shadow:0 2px 0 var(--woodd)}
+#mode{position:absolute;left:50%;top:16.4%;transform:translateX(-50%);font:16px 'Patrick Hand';color:#fffaf0;background:#8a5a36dd;padding:1px 12px;white-space:nowrap;border-radius:999px;z-index:6;display:none}
+/* palette dropdown */
+#pal{position:absolute;left:2.5%;top:7.5%;width:min(250px,64%);background:var(--paper);border:2px solid var(--woodd);border-radius:14px;padding:12px;z-index:9;box-shadow:0 12px 30px #5a3a2255;transform-origin:top left;transform:scale(.85) translateY(-8px);opacity:0;pointer-events:none;transition:.25s}
+#pal.open{transform:none;opacity:1;pointer-events:auto}
+#wheelBox{position:relative;width:170px;height:170px;margin:0 auto}
+#wheel{width:170px;height:170px;border-radius:50%;touch-action:none;cursor:crosshair;display:block}
+#knob{position:absolute;width:18px;height:18px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px var(--ink);pointer-events:none;transform:translate(-50%,-50%)}
+.row{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px}
+.row input[type=range]{flex:1;accent-color:var(--gold)}
+#sw{width:26px;height:26px;border-radius:50%;border:2px solid var(--ink)}
+#szdot{width:30px;height:30px;display:flex;align-items:center;justify-content:center}
+#szdot i{display:block;border-radius:50%;background:var(--ink)}
+.note{font-size:12px;color:var(--soft)}
+/* hourglass */
+#hg{width:48px;height:70px;display:none;cursor:default;flex:none}
+#hg svg{width:100%;height:100%;transition:transform .7s ease}
+#status{display:none;font:16px/1.15 'Patrick Hand';color:#fffaf0;background:#6b4a2ad9;padding:5px 10px;border-radius:10px;max-width:58%}
+/* toasts & caption */
+#toast{position:absolute;left:50%;bottom:1.6%;transform:translate(-50%,14px);background:#5a3a22ee;color:#fffaf0;padding:6px 14px;border-radius:999px;font:16px/1.2 'Patrick Hand';opacity:0;transition:.3s;pointer-events:none;z-index:20;max-width:90%;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#breath{position:absolute;right:3%;bottom:16%;font:20px 'Patrick Hand';color:#fffaf0;text-shadow:0 1px 4px #5a3a22;opacity:0;transition:opacity 1s;pointer-events:none;z-index:6}
+.steam path{transform-box:fill-box;transform-origin:bottom center}
+.steam.breathe path{animation:none}
+/* gallery wall */
+#wall{position:absolute;left:6%;top:12.5%;width:88%;height:39%;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:3.2%;z-index:4}
+.frm{position:relative;cursor:pointer;background:#a87447;padding:5px;border-radius:3px;box-shadow:0 6px 10px #5a3a2244;transition:transform .3s}
+.frm:hover{transform:translateY(-3px) rotate(-1deg)}
+.frm .mat{background:#fbf3e2;padding:4px}
+.frm img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;filter:blur(2.6px) saturate(.9)}
+.frm.daily{background:linear-gradient(135deg,#f1cf72,#c9922e);padding:6px}
+.frm .plq{position:absolute;left:50%;bottom:-11px;transform:translateX(-50%);background:#e8c36a;font:10px Nunito;font-weight:800;padding:0 5px;border-radius:3px;white-space:nowrap;color:#5a3a22}
+#wallnav{position:absolute;left:0;right:0;top:51.5%;display:none;justify-content:center;gap:10px;z-index:4}
+#empty{position:absolute;left:12%;right:12%;top:26%;text-align:center;font:22px 'Patrick Hand';color:#f1e2c4;text-shadow:0 1px 3px #0008;z-index:3}
+#preview{position:absolute;left:68.1%;top:56%;width:18.8%;aspect-ratio:4/3;object-fit:cover;pointer-events:none;border-radius:1px}
+.sp{animation:spbob 4s ease-in-out infinite}@keyframes spbob{50%{transform:translateY(6px)}}
+.cat .body{transform-box:fill-box;transform-origin:center bottom;animation:breathe 4.2s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.03,1.06)}}
+.zz{animation:zz 3.6s ease-in infinite;opacity:0}
+.zz.b{animation-delay:1.2s}.zz.c{animation-delay:2.4s}
+@keyframes zz{0%{opacity:0;transform:translate(0,0)}25%{opacity:.85}100%{opacity:0;transform:translate(18px,-46px)}}
+/* modal */
+#modal{position:fixed;inset:0;background:#3b2716aa;display:none;align-items:center;justify-content:center;z-index:50;padding:14px;backdrop-filter:blur(3px)}
+#modal.on{display:flex}
+.card{background:var(--paper);border:3px solid var(--woodd);border-radius:18px;max-width:520px;width:100%;max-height:92vh;overflow:auto;padding:18px;box-shadow:0 20px 50px #2a1a0e66;animation:up .45s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes up{from{transform:scale(.7) translateY(30px);opacity:0}}
+.card h2{font:30px/1.1 'Patrick Hand';margin:0 0 4px}
+.card .meta{font-size:13px;color:var(--soft);margin-bottom:8px}
+.card img.big{width:100%;border:8px solid #a87447;border-radius:4px;box-shadow:inset 0 0 0 4px #fbf3e2;display:block;background:var(--cream)}
+.card img.big.daily{border-color:#d9a845}
+.card label{display:block;font-weight:700;font-size:13px;margin:10px 0 3px}
+.card input,.card textarea{width:100%;font:15px Nunito;padding:8px 10px;border:2px solid #d9c3a0;border-radius:10px;background:#fff;color:var(--ink)}
+.card textarea{resize:vertical;min-height:64px}
+.acts{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+.cm{border-top:1px dashed #d9c3a0;padding:8px 0;font-size:14px}
+.cm b{font-weight:800}
+.badge{font-size:10px;font-weight:800;background:#cfe3f3;color:#2f5a7a;border-radius:6px;padding:1px 5px;margin-left:4px;vertical-align:1px}
+.about{white-space:pre-wrap;background:#f6ecd8;border-radius:10px;padding:8px 10px;font-size:14px;margin:8px 0}
+.log li{margin:4px 0}
+footer{max-width:760px;padding:10px 16px 18px;font-size:12px;color:#d9c3a0;text-align:center}
+#prevbadge{position:fixed;right:8px;bottom:8px;font-size:11px;background:#fff8;padding:2px 8px;border-radius:8px;display:none}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="wrap">
+<div id="viewport">
+<div id="rooms">
+
+<!-- ================= STUDIO ================= -->
+<section class="room" id="studio">
+<svg class="scene" viewBox="0 0 800 1000" preserveAspectRatio="none" aria-label="A cozy cottage studio">
+<defs>
+<linearGradient id="wallG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6ead5"/><stop offset="1" stop-color="#ead5b3"/></linearGradient>
+<linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#aebcc4"/><stop offset=".7" stop-color="#d9d6c8"/><stop offset="1" stop-color="#e8dfc8"/></linearGradient>
+<linearGradient id="tableG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9935f"/><stop offset="1" stop-color="#a87447"/></linearGradient>
+<pattern id="planks" width="168" height="1000" patternUnits="userSpaceOnUse">
+<rect width="168" height="1000" fill="#4a2b1b"/>
+<rect x="0" width="40" height="1000" fill="#5a3522"/><rect x="42" width="40" height="1000" fill="#4f2e1d"/><rect x="84" width="40" height="1000" fill="#5d3824"/><rect x="126" width="40" height="1000" fill="#53311f"/>
+<g stroke="#2a170d" stroke-width="2.5"><path d="M41 0V1000M83 0V1000M125 0V1000M167 0V1000"/></g>
+<g fill="none" stroke="#3e2416" stroke-width="1.2" opacity=".7"><path d="M12 0 q4 250 -2 500 t3 500M28 0 q-3 300 2 600 t-2 400M58 0 q5 200 0 450 t2 550M100 0 q-4 300 3 520 t-1 480M142 0 q3 220 -3 470 t2 530"/></g>
+<g fill="#3a2214"><ellipse cx="20" cy="310" rx="5" ry="9"/><ellipse cx="104" cy="640" rx="6" ry="10"/><ellipse cx="146" cy="140" rx="4" ry="7"/></g>
+<g fill="#7a5038" opacity=".35"><rect x="2" width="3" height="1000"/><rect x="86" width="3" height="1000"/></g>
+<g fill="#2a170d"><circle cx="20" cy="40" r="2"/><circle cx="62" cy="40" r="2"/><circle cx="104" cy="40" r="2"/><circle cx="146" cy="40" r="2"/></g>
+</pattern>
+<linearGradient id="stoneG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a39d92"/><stop offset="1" stop-color="#77716a"/></linearGradient>
+<radialGradient id="glowJar" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff2a8" stop-opacity=".9"/><stop offset="1" stop-color="#fff2a8" stop-opacity="0"/></radialGradient>
+<radialGradient id="waterG" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#e9f7fb"/><stop offset="1" stop-color="#9fd0e2"/></radialGradient>
+<symbol id="s-pencil" overflow="visible"><rect x="0" y="-7" width="14" height="14" rx="3" fill="#f2a7b5"/><rect x="13" y="-7" width="12" height="14" fill="#c8c8cc"/><rect x="25" y="-7" width="100" height="14" fill="#f2c14e"/><rect x="25" y="-2" width="100" height="3" fill="#e2ae36"/><path d="M125-7 L150 0 L125 7Z" fill="#ecd0a8"/><path d="M142-2.3 L150 0 L142 2.3Z" fill="#3a3538"/></symbol>
+<symbol id="s-charcoal" overflow="visible"><path d="M0-7 Q4-9 40-8 L84-6 Q90 0 84 6 L40 8 Q4 9 0 7Z" fill="#2a2628"/><path d="M0-8 H40 V8 H0Z" fill="#e9dcc6"/><path d="M8-8 V8 M18-8 V8 M28-8 V8" stroke="#d3c2a5" stroke-width="1.5"/><path d="M60-4 L78-2" stroke="#4a4446" stroke-width="2"/></symbol>
+<symbol id="s-round" overflow="visible"><path d="M0-4 Q60-6 120-5 L120 5 Q60 6 0 4Z" fill="#7a3f2c"/><circle cx="0" cy="0" r="4" fill="#7a3f2c"/><rect x="120" y="-6" width="30" height="12" rx="2" fill="#cfcfd4"/><path d="M150-6 Q166-6 190 0 Q166 6 150 6Z" fill="#4b3324"/></symbol>
+<symbol id="s-filbert" overflow="visible"><path d="M0-5 Q60-7 115-6 L115 6 Q60 7 0 5Z" fill="#3d6b8a"/><circle cx="0" cy="0" r="5" fill="#3d6b8a"/><path d="M115-6 L148-10 L148 10 L115 6Z" fill="#cfcfd4"/><path d="M148-10 Q178-12 188 0 Q178 12 148 10Z" fill="#c9a06b"/><path d="M152-6 L184-3 M152 0 L188 0 M152 6 L184 3" stroke="#b08250" stroke-width="1"/></symbol>
+<symbol id="s-tube" overflow="visible"><path d="M0-12 L8-12 L8 12 L0 12Z" fill="#cfcfd4"/><path d="M8-14 Q60-16 74-9 L74 9 Q60 16 8 14Z" fill="#f4f1ea" stroke="#d7d0c2"/><rect x="20" y="-13" width="34" height="26" rx="3" fill="currentColor"/><rect x="74" y="-5" width="8" height="10" fill="#cfcfd4"/><rect x="82" y="-7" width="14" height="14" rx="2" fill="#5a4a3e"/></symbol>
+</defs>
+<rect width="800" height="790" fill="url(#planks)"/><rect width="800" height="790" fill="url(#wallG)" opacity=".08"/>
+<!-- window -->
+<rect x="266" y="14" width="268" height="172" rx="8" fill="#e9dfcc" stroke="#8a8378" stroke-width="10"/>
+<rect x="278" y="26" width="244" height="148" fill="url(#skyG)"/>
+<circle cx="470" cy="58" r="16" fill="#f4ecd2" opacity=".85"/><circle cx="470" cy="58" r="30" fill="#f4ecd2" opacity=".25"/>
+<path d="M290 62 q30-10 60 0 q20-6 40 2 M420 48 q26-8 52 2" stroke="#eef0ea" stroke-width="5" fill="none" stroke-linecap="round" opacity=".7"/>
+<path d="M278 112 L318 84 L352 100 L392 72 L436 98 L470 80 L522 104 V174 H278Z" fill="#7d8c86"/>
+<path d="M278 124 Q320 100 360 118 T452 110 T522 118 V174 H278Z" fill="#4f6146"/>
+<path d="M278 140 Q330 122 392 140 T522 134 V174 H278Z" fill="#3a4c33"/>
+<path d="M300 150 q30-6 60 0 M410 146 q26-6 56 2" stroke="#8a5f86" stroke-width="7" stroke-linecap="round" opacity=".8"/>
+<path d="M330 158 q20-4 40 0 M450 160 q24-5 48 0" stroke="#9a6f92" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+<path d="M278 160 Q360 150 440 162 T522 158 V174 H278Z" fill="#2c3b27"/>
+<path d="M300 146 h70" stroke="#a9bcc4" stroke-width="3" opacity=".6"/>
+<path d="M400 26V174M278 100H522" stroke="#6b4a32" stroke-width="5"/>
+<rect x="252" y="184" width="296" height="16" rx="2" fill="url(#stoneG)"/><path d="M300 184v16M372 184v16M446 184v16M510 184v16" stroke="#6a645d" stroke-width="2"/>
+<!-- stone shelves -->
+<g><rect x="14" y="158" width="226" height="14" rx="2" fill="url(#stoneG)"/><path d="M70 158v14M128 158v14M186 158v14" stroke="#6a645d" stroke-width="2"/><path d="M30 172h34l-10 22h-14z M188 172h34l-8 22h-16z" fill="#8a847b" stroke="#6a645d" stroke-width="1.5"/></g>
+<g><rect x="562" y="170" width="226" height="14" rx="2" fill="url(#stoneG)"/><path d="M618 170v14M676 170v14M734 170v14" stroke="#6a645d" stroke-width="2"/><path d="M578 184h34l-10 22h-14z M736 184h34l-8 22h-16z" fill="#8a847b" stroke="#6a645d" stroke-width="1.5"/></g>
+<!-- round bottle with a blue rose -->
+<g><path d="M44 120 q-4-22 6-38" stroke="#4f7a45" stroke-width="3" fill="none"/><path d="M46 104 q-14-4-16-14 q12 0 16 10z M48 96 q12-8 20-4 q-6 10-20 6z" fill="#5f8f52"/>
+<g transform="translate(51 76)"><circle r="11" fill="#3f63c4"/><path d="M-8-2 q4-8 10-6 q6 2 4 8 q-2 5-8 4" fill="none" stroke="#7f9be8" stroke-width="2"/><path d="M-3 0 q2-4 5-2 q2 3-1 4" fill="none" stroke="#a9bdf2" stroke-width="1.6"/><path d="M-11 2 q-4 8 4 10 M11 0 q5 8-3 11" stroke="#2e4c9e" stroke-width="3" fill="none"/></g>
+<circle cx="48" cy="139" r="19" fill="#bfe0d9" opacity=".72"/><rect x="42" y="112" width="12" height="10" rx="2" fill="#bfe0d9" opacity=".8"/><ellipse cx="41" cy="132" rx="5" ry="8" fill="#fff" opacity=".5"/><path d="M33 146 q15 8 30 0" stroke="#9cc9bf" stroke-width="2" fill="none"/></g>
+<!-- tall swirly potion -->
+<g><path d="M80 158 V128 Q80 118 88 114 V100 H96 V114 Q104 118 104 128 V158Z" fill="#8a5fb8" opacity=".85"/><path d="M84 150 q8-8 0-16 q-6-8 4-14" stroke="#c9a8ef" stroke-width="2.5" fill="none"/><rect x="86" y="92" width="12" height="10" rx="3" fill="#b88a5e"/><path d="M98 96 l10-6" stroke="#e8d6b0" stroke-width="1.5"/><rect x="104" y="86" width="12" height="9" rx="1.5" fill="#f1e6cf" transform="rotate(-20 110 90)"/><text x="94" y="134" font-size="8" fill="#ffe9a8">✦</text></g>
+<g class="hit" id="book" tabindex="0" role="button" aria-label="About the cottage"><rect x="120" y="118" width="15" height="40" rx="2" fill="#7a2e3a"/><rect x="136" y="114" width="13" height="44" rx="2" fill="#2f4e6e"/><rect x="150" y="122" width="16" height="36" rx="2" fill="#b0873a"/><path d="M123 128h9M139 126h7M153 132h10" stroke="#fff6" stroke-width="2"/></g>
+<!-- firefly jar -->
+<g><circle cx="198" cy="140" r="26" fill="url(#glowJar)"><animate attributeName="opacity" values=".5;1;.5" dur="3.2s" repeatCount="indefinite"/></circle><rect x="178" y="120" width="40" height="38" rx="12" fill="#e6edd8" opacity=".55"/><rect x="181" y="113" width="34" height="9" rx="3" fill="#8a847b"/><g fill="#fff3a0"><circle cx="190" cy="138" r="2.4"><animate attributeName="cy" values="138;132;138" dur="2.6s" repeatCount="indefinite"/></circle><circle cx="204" cy="146" r="2"><animate attributeName="cx" values="204;208;204" dur="3s" repeatCount="indefinite"/></circle><circle cx="198" cy="130" r="1.8"/></g></g>
+<!-- right shelf: heart potion, mushroom jar, crooked amber bottle -->
+<g><path d="M598 170 c-22-14-22-34-8-36 c6 0 8 4 8 6 c0-2 2-6 8-6 c14 2 14 22-8 36z" fill="#c2507a" opacity=".85"/><rect x="593" y="118" width="10" height="12" rx="2" fill="#b88a5e"/><ellipse cx="590" cy="146" rx="3" ry="6" fill="#fff" opacity=".45"/><path d="M603 124 q14 4 18 14" stroke="#e8d6b0" stroke-width="1.3" fill="none"/><rect x="616" y="136" width="12" height="9" rx="1.5" fill="#f1e6cf"/></g>
+<g><rect x="634" y="136" width="42" height="34" rx="9" fill="#dfe7d2" opacity=".6"/><rect x="637" y="129" width="36" height="9" rx="3" fill="#8a847b"/><path d="M646 168 v-12 M664 168 v-10" stroke="#f1e6cf" stroke-width="5"/><path d="M638 158 q8-14 16-2z M654 160 q10-16 20 0z" fill="#c8443a"/><g fill="#fff"><circle cx="645" cy="153" r="1.6"/><circle cx="663" cy="152" r="1.8"/><circle cx="668" cy="156" r="1.2"/></g></g>
+<g transform="rotate(8 704 150)"><path d="M690 170 V140 Q690 130 700 126 V112 H708 V126 Q718 130 718 140 V170Z" fill="#d99a3a" opacity=".85"/><rect x="698" y="104" width="12" height="10" rx="3" fill="#7a4e2c"/><g fill="#fff" opacity=".6"><circle cx="700" cy="158" r="2.5"/><circle cx="706" cy="148" r="1.8"/><circle cx="702" cy="140" r="1.3"/></g></g>
+<g><path d="M736 170 V150 q0-10 10-12 q10 2 10 12 V170Z" fill="#5fb3a8" opacity=".8"/><circle cx="746" cy="134" r="5" fill="#b88a5e"/><path d="M740 160 h12" stroke="#2f7a70" stroke-width="2"/></g>
+<!-- gallery sign (upper right) -->
+<g class="sign hit" id="signGal" tabindex="0" role="button" aria-label="Go to the gallery">
+<circle cx="690" cy="14" r="5" fill="#8a5a36"/>
+<g class="board" style="transform-origin:690px 14px">
+<path d="M690 14 Q664 30 646 52 M690 14 Q716 30 736 52" stroke="#c9a66b" stroke-width="3" fill="none" stroke-dasharray="5 2" stroke-linecap="round"/>
+<path d="M630 52 L749 49 L775 76 L751 105 L628 103 L632 78 Z" fill="#a8794a" stroke="#5a3a22" stroke-width="3" stroke-linejoin="round"/>
+<path d="M638 64 q50-4 104 0 M636 92 q54 3 108-1 M660 80 q20 2 40 0" stroke="#8a5f38" stroke-width="2" fill="none"/>
+<circle cx="646" cy="56" r="3" fill="#3a2a20"/><circle cx="736" cy="56" r="3" fill="#3a2a20"/>
+<text id="signTxt" x="692" y="88" text-anchor="middle" font-family="Patrick Hand" font-size="28" fill="#2e1c12">gallery</text>
+</g></g>
+<!-- easel -->
+<path d="M332 790 L346 790 L398 196 L392 196Z M468 790 L454 790 L402 196 L408 196Z" fill="#a87447"/>
+<rect x="392" y="166" width="16" height="40" rx="3" fill="#a87447"/><circle cx="400" cy="164" r="8" fill="#8a5a36"/>
+<rect x="374" y="186" width="52" height="16" rx="3" fill="#8a5a36"/>
+<rect x="63" y="197" width="674" height="508" fill="#f1e6cf" stroke="#dccaa6" stroke-width="5"/>
+<rect x="46" y="700" width="708" height="20" rx="5" fill="#b98455" stroke="#8a5a36" stroke-width="2"/>
+<!-- table -->
+<rect y="785" width="800" height="215" fill="url(#tableG)"/>
+<path d="M0 785H800" stroke="#7a4e2c" stroke-width="4"/>
+<path d="M0 850H800M0 918H800" stroke="#9a6a40" stroke-width="2" opacity=".5"/>
+<path d="M120 850v68M520 918v82M640 785v65" stroke="#9a6a40" stroke-width="2" opacity=".4"/>
+<!-- tools -->
+<g class="tool hit" data-tool="pencil" tabindex="0" role="button" aria-label="Pencil"><use href="#s-pencil" transform="translate(70 842) rotate(-8)"/></g>
+<g class="tool hit" data-tool="charcoal" tabindex="0" role="button" aria-label="Charcoal"><use href="#s-charcoal" transform="translate(90 905) rotate(7)"/></g>
+<g class="tool hit" data-tool="round" tabindex="0" role="button" aria-label="Round brush"><use href="#s-round" transform="translate(250 870) rotate(-14)"/></g>
+<g class="tool hit" data-tool="filbert" tabindex="0" role="button" aria-label="Big filbert brush"><use href="#s-filbert" transform="translate(262 950) rotate(-8)"/></g>
+<g id="tubes">
+<g class="tool hit tube" data-color="#c8443a" tabindex="0" role="button" aria-label="Red paint" style="color:#c8443a"><use href="#s-tube" transform="translate(470 822) rotate(10)"/></g>
+<g class="tool hit tube" data-color="#d9a23f" tabindex="0" role="button" aria-label="Ochre paint" style="color:#d9a23f"><use href="#s-tube" transform="translate(462 860) rotate(-6)"/></g>
+<g class="tool hit tube" data-color="#5b8a4a" tabindex="0" role="button" aria-label="Green paint" style="color:#5b8a4a"><use href="#s-tube" transform="translate(478 902) rotate(4)"/></g>
+<g class="tool hit tube" data-color="#3e5aa8" tabindex="0" role="button" aria-label="Blue paint" style="color:#3e5aa8"><use href="#s-tube" transform="translate(470 944) rotate(-9)"/></g>
+<g class="tool hit tube" data-color="#d77a9a" tabindex="0" role="button" aria-label="Rose paint" style="color:#d77a9a"><use href="#s-tube" transform="translate(548 984) rotate(-14)"/></g>
+</g>
+<!-- flower water dish -->
+<g class="tool hit" id="dish" tabindex="0" role="button" aria-label="Water dish: dip your brush">
+<g transform="translate(640 838)">
+<g fill="#d6eef5" stroke="#9fc7d6" stroke-width="2" opacity=".95">
+<ellipse cx="0" cy="-26" rx="22" ry="16"/><ellipse cx="34" cy="-10" rx="22" ry="16"/><ellipse cx="26" cy="22" rx="22" ry="16"/><ellipse cx="-26" cy="22" rx="22" ry="16"/><ellipse cx="-34" cy="-10" rx="22" ry="16"/></g>
+<ellipse cx="0" cy="2" rx="34" ry="24" fill="url(#waterG)" stroke="#9fc7d6" stroke-width="2"/>
+<ellipse cx="-10" cy="-6" rx="12" ry="4" fill="#fff" opacity=".7"/>
+<circle id="ripple" cx="0" cy="2" r="2" fill="none" stroke="#fff" stroke-width="2" opacity="0"/>
+</g></g>
+<!-- mug -->
+<g class="tool hit" id="mug" tabindex="0" role="button" aria-label="Warm mug: breathe with the steam">
+<g transform="translate(726 930)">
+<g class="steam" id="steam" fill="none" stroke="#fffaf0" stroke-width="4" stroke-linecap="round" opacity=".75">
+<path d="M-12-42 q-8-14 2-26 t0-28"><animate attributeName="opacity" values=".1;.8;.1" dur="3s" repeatCount="indefinite"/></path>
+<path d="M8-44 q8-14-2-26 t2-28"><animate attributeName="opacity" values=".7;.1;.7" dur="3.4s" repeatCount="indefinite"/></path>
+</g>
+<path d="M30-24 q24 0 22 20 q-2 18-24 16" fill="none" stroke="#7d9579" stroke-width="9"/>
+<path d="M-32-38 H32 V22 Q32 40 14 40 H-14 Q-32 40 -32 22Z" fill="#8fa58a"/>
+<ellipse cx="0" cy="-38" rx="32" ry="8" fill="#e9e1d0"/><ellipse cx="0" cy="-37" rx="26" ry="5" fill="#7a4e2c"/>
+<path d="M-32-6 H32" stroke="#a9bba4" stroke-width="4"/>
+</g></g>
+</svg>
+<canvas id="cv" width="1000" height="750" aria-label="Your canvas"></canvas>
+<div id="beamS"></div>
+<div class="motes" id="motesS"></div>
+<div id="ghost"></div>
+<div class="tags"><button class="tag" id="palBtn" aria-expanded="false">🎨 colors ▾</button><button class="tag" id="sndBtn" aria-label="Sound">♪ off</button></div>
+<div id="mode">co-op canvas · today</div>
+<div id="pal" role="dialog" aria-label="Colors and size">
+<div id="wheelBox"><canvas id="wheel" width="340" height="340"></canvas><div id="knob"></div></div>
+<div class="row">light<input type="range" id="val" min="15" max="100" value="80" aria-label="Lightness"><span id="sw"></span></div>
+<div class="row">size<input type="range" id="size" min="1" max="10" value="5" aria-label="Stroke size"><span id="szdot"><i></i></span></div>
+<div class="note" id="palNote">Paint tubes on the table are quick colors too.</div>
+</div>
+<div class="ledge" id="ledge">
+<div id="hg" aria-label="Hourglass"></div>
+<span id="status"></span>
+<button class="btn" id="undoBtn">undo</button>
+<button class="btn" id="newBtn">fresh canvas</button>
+<span class="sp"></span>
+<button class="btn" id="logBtn" style="display:none">log</button>
+<button class="btn pri" id="pubBtn">publish ✦</button>
+</div>
+<div id="breath"></div>
+</section>
+
+<!-- ================= GALLERY ================= -->
+<section class="room" id="gallery">
+<svg class="scene" viewBox="0 0 800 1000" preserveAspectRatio="none" aria-label="The gallery room">
+<defs>
+<linearGradient id="gWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3e5cc"/><stop offset="1" stop-color="#e7d1ae"/></linearGradient>
+<linearGradient id="velvet" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9c2532"/><stop offset="1" stop-color="#5e1119"/></linearGradient>
+</defs>
+<rect width="800" height="800" fill="url(#planks)"/><rect y="552" width="800" height="14" fill="#2e1c12"/><rect y="566" width="800" height="234" fill="#000" opacity=".12"/>
+<rect y="800" width="800" height="200" fill="#7a5236"/><path d="M0 800H800M0 860H800M0 930H800" stroke="#5e3d27" stroke-width="2"/><path d="M160 800v60M480 860v70M300 930v70M640 800v60" stroke="#5e3d27" stroke-width="2"/>
+<g><ellipse cx="420" cy="935" rx="340" ry="54" fill="#6b5a3a"/>
+<ellipse cx="420" cy="935" rx="330" ry="50" fill="none" stroke="#8a4a2e" stroke-width="9" stroke-dasharray="16 3"/>
+<ellipse cx="420" cy="935" rx="300" ry="42" fill="none" stroke="#b98a3a" stroke-width="9" stroke-dasharray="12 4"/>
+<ellipse cx="420" cy="935" rx="268" ry="34" fill="none" stroke="#5f6e42" stroke-width="9" stroke-dasharray="12 4"/>
+<ellipse cx="420" cy="935" rx="236" ry="26" fill="none" stroke="#d8c7a0" stroke-width="8" stroke-dasharray="12 4"/>
+<ellipse cx="420" cy="935" rx="204" ry="18" fill="none" stroke="#8a4a2e" stroke-width="8" stroke-dasharray="12 4"/>
+<ellipse cx="420" cy="935" rx="170" ry="10" fill="#6b7a4a"/></g>
+<!-- spider web in the corner -->
+<g stroke="#efe6d4" stroke-width="1.3" fill="none" opacity=".6">
+<path d="M0 0 L120 6 M0 0 L104 60 M0 0 L66 102 M0 0 L22 128 M0 0 L0 130"/>
+<path d="M30 2 Q26 18 16 26 Q8 30 0 34"/><path d="M58 3 Q52 32 32 50 Q16 60 0 66"/><path d="M88 4 Q78 46 48 76 Q24 92 0 98"/><path d="M114 6 Q100 62 62 98 Q32 120 0 126"/>
+</g>
+<g class="spider"><path d="M44 74 V108" stroke="#efe6d4" stroke-width="1" opacity=".7"/>
+<g class="sp"><g stroke="#1a1416" stroke-width="2" fill="none" stroke-linecap="round"><path d="M40 112 q-8-4-10-10 M40 115 q-9 0-12-4 M48 112 q8-4 10-10 M48 115 q9 0 12-4 M41 118 q-6 4-8 10 M47 118 q6 4 8 10"/></g>
+<ellipse cx="44" cy="116" rx="7" ry="8" fill="#1a1416"/><circle cx="44" cy="107" r="5" fill="#1a1416"/><circle cx="42" cy="106" r="1.4" fill="#fff"/><circle cx="46.5" cy="106" r="1.4" fill="#fff"/><path d="M41.5 110 q2.5 2 5 0" stroke="#e99a9a" stroke-width="1" fill="none"/></g></g>
+<!-- studio sign -->
+<g class="sign hit" id="signStudio" tabindex="0" role="button" aria-label="Back to the studio">
+<circle cx="128" cy="14" r="5" fill="#3a2a20"/>
+<g class="board" style="transform-origin:128px 14px">
+<path d="M128 14 Q108 30 92 52 M128 14 Q150 30 186 52" stroke="#c9a66b" stroke-width="3" fill="none" stroke-dasharray="5 2" stroke-linecap="round"/>
+<path d="M54 78 L80 50 L200 53 L198 104 L78 106 Z" fill="#a8794a" stroke="#5a3a22" stroke-width="3" stroke-linejoin="round"/>
+<path d="M84 64 q50-3 108 1 M82 94 q54 3 112-1" stroke="#8a5f38" stroke-width="2" fill="none"/>
+<circle cx="92" cy="57" r="3" fill="#3a2a20"/><circle cx="186" cy="57" r="3" fill="#3a2a20"/>
+<text x="138" y="88" text-anchor="middle" font-family="Patrick Hand" font-size="28" fill="#2e1c12">studio</text>
+</g></g>
+<!-- high-back chair + cat -->
+<g>
+<rect x="56" y="870" width="16" height="80" rx="4" fill="#3a2214"/><rect x="268" y="870" width="16" height="80" rx="4" fill="#3a2214"/>
+<path d="M50 860 V560 Q50 450 170 450 Q290 450 290 560 V860Z" fill="url(#velvet)"/>
+<path d="M50 860 V560 Q50 450 170 450 Q290 450 290 560 V860Z" fill="none" stroke="#3e0a10" stroke-width="5"/>
+<path d="M78 840 V570 Q78 480 170 480 Q262 480 262 570 V840Z" fill="#7a1622" opacity=".7"/>
+<path d="M110 500 q30-14 70-6" stroke="#b8454f" stroke-width="5" fill="none" opacity=".45" stroke-linecap="round"/>
+<g fill="#3e0a10"><circle cx="130" cy="560" r="5"/><circle cx="210" cy="560" r="5"/><circle cx="170" cy="610" r="5"/><circle cx="130" cy="660" r="5"/><circle cx="210" cy="660" r="5"/><circle cx="170" cy="710" r="5"/></g>
+<g stroke="#4f0d15" stroke-width="2" opacity=".6" fill="none"><path d="M130 560 L170 610 L210 560 M130 660 L170 610 L210 660 M130 660 L170 710 L210 660"/></g>
+<rect x="30" y="740" width="52" height="120" rx="22" fill="#821a26"/><rect x="258" y="740" width="52" height="120" rx="22" fill="#821a26"/>
+<path d="M40 752 q10-6 22-2 q8 3 12-1" stroke="#3e0a10" stroke-width="3" fill="none" stroke-linecap="round"/>
+<g fill="#f3ead8"><circle cx="44" cy="746" r="8"/><circle cx="55" cy="738" r="9"/><circle cx="67" cy="745" r="7"/><circle cx="60" cy="752" r="5"/><circle cx="48" cy="733" r="5"/><circle cx="36" cy="738" r="4"/></g>
+<g fill="#e3d6bd"><circle cx="52" cy="750" r="3"/><circle cx="60" cy="744" r="2.5"/></g>
+<path d="M290 770 l12 8" stroke="#3e0a10" stroke-width="3" stroke-linecap="round"/><g fill="#f3ead8"><circle cx="300" cy="776" r="6"/><circle cx="308" cy="768" r="5"/><circle cx="310" cy="780" r="4"/></g>
+<rect x="40" y="806" width="260" height="74" rx="20" fill="#8e2230"/>
+<path d="M40 870 h260" stroke="#3e0a10" stroke-width="4" opacity=".6"/>
+</g>
+<g class="cat">
+<g class="body">
+<path d="M268 806 q30 -4 18 -30" stroke="#2b2630" stroke-width="16" fill="none" stroke-linecap="round"/>
+<ellipse cx="185" cy="792" rx="92" ry="40" fill="#2b2630"/>
+<path d="M170 756 q6 30 0 70 M200 754 q8 30 2 74 M230 760 q6 26 2 64" stroke="#3b3442" stroke-width="7" fill="none" stroke-linecap="round" opacity=".7"/>
+<path d="M100 822 q40 22 120 4" stroke="#3d3645" stroke-width="12" fill="none" stroke-linecap="round"/>
+</g>
+<circle cx="112" cy="784" r="34" fill="#2b2630"/>
+<path d="M86 762 L90 730 L110 754Z M120 752 L140 730 L140 762Z" fill="#2b2630"/><path d="M92 756 L94 740 L104 752Z M126 752 L136 740 L136 758Z" fill="#c98a96"/>
+<path d="M96 786 q7 5 14 0 M118 786 q7 5 14 0" stroke="#e8d9bd" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+<path d="M110 794 l4 4 l4-4z" fill="#d9776f"/>
+<text class="zz" x="140" y="740" font-family="Patrick Hand" font-size="22" fill="#8a6a4f">z</text>
+<text class="zz b" x="150" y="730" font-family="Patrick Hand" font-size="18" fill="#8a6a4f">z</text>
+<text class="zz c" x="146" y="736" font-family="Patrick Hand" font-size="15" fill="#8a6a4f">z</text>
+</g>
+<!-- cat's co-op easel -->
+<g class="hit" id="coopEasel" tabindex="0" role="button" aria-label="The cat's co-op easel">
+<path d="M610 520 L520 990 M630 520 L730 990 M620 520 L650 990" stroke="#a87447" stroke-width="12" stroke-linecap="round"/>
+<rect x="538" y="552" width="164" height="128" fill="#f1e6cf" stroke="#dccaa6" stroke-width="4"/>
+<rect x="526" y="682" width="190" height="14" rx="4" fill="#b98455" stroke="#8a5a36" stroke-width="2"/>
+<path d="M584 696 L572 738 M656 696 L668 738" stroke="#7a5a3a" stroke-width="2"/>
+<rect x="556" y="736" width="128" height="50" rx="8" fill="#dcb47f" stroke="#8a5a36" stroke-width="3"/>
+<text x="620" y="770" text-anchor="middle" font-family="Patrick Hand" font-size="26" fill="#5a3a22">co-op ✎</text>
+</g>
+<!-- hourglass decor -->
+<g transform="translate(742 900)"><rect x="-22" y="-60" width="44" height="8" rx="2" fill="#7a4e2c"/><rect x="-22" y="40" width="44" height="8" rx="2" fill="#7a4e2c"/><path d="M-18-52 V40 M18-52 V40" stroke="#7a4e2c" stroke-width="4"/><path d="M-13-52 Q-13-12 0-6 Q13-12 13-52Z M-13 40 Q-13 0 0-6 Q13 0 13 40Z" fill="#e8f4f8" opacity=".8" stroke="#bcd" /><path d="M-9 40 Q0 22 9 40Z" fill="#e3c27a"/></g>
+</svg>
+<img id="preview" alt="">
+<div id="beamG"></div>
+<div class="motes" id="motesG"></div>
+<div id="empty">The walls are waiting.<br>Paint something in the studio and publish it ✦</div>
+<div id="wall"></div>
+<div id="wallnav"><button class="btn" id="wPrev">‹ newer</button><button class="btn" id="wNext">older ›</button></div>
+</section>
+</div>
+<div id="toast"></div>
+</div>
+</div>
+<footer>A cozy creative space from <b>Mote</b> · small moments, clear the dust. Not a substitute for therapy or care.</footer>
+<div id="modal" role="dialog" aria-modal="true"><div class="card" id="card"></div></div>
+<div id="prevbadge">preview mode</div>
+
+<script>
+/* ---------- shared data: window.charm (falls back to an in-memory mock for previews) ---------- */
+const PREVIEW=!window.charm;
+if(PREVIEW){const m=new Map(),ls=new Set();const fire=()=>ls.forEach(f=>{try{f()}catch(e){}});
+window.charm={async get(k){return m.has(k)?JSON.parse(m.get(k)):null},async set(k,v){m.set(k,JSON.stringify(v));setTimeout(fire,30)},async del(k){m.delete(k);setTimeout(fire,30)},
+async list(p=''){return[...m].filter(([k])=>k.startsWith(p)).map(([k,v])=>({key:k,value:JSON.parse(v),updated_at:Date.now()}))},
+async all(p=''){const o={};for(const[k,v]of m)if(k.startsWith(p))o[k]=JSON.parse(v);return o},onChange(cb){ls.add(cb);return()=>ls.delete(cb)},_m:m};
+document.getElementById('prevbadge').style.display='block'}
+const C=window.charm;
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rid=()=>Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6);
+const TZ='America/Los_Angeles';
+const dayKey=t=>new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).format(t||Date.now());
+const fmtDay=d=>{const[y,m,dd]=d.split('-').map(Number);return new Date(Date.UTC(y,m-1,dd,12)).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'})};
+const fmtTime=t=>new Date(t).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+let toastT;function toast(t,ms=2600){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('on'),ms)}
+function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const hexRgb=h=>{const n=parseInt((h||'#333333').slice(1),16);return[n>>16&255,n>>8&255,n&255]};
+const rgba=(c,a)=>`rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const shade=(c,f)=>c.map(v=>Math.max(0,Math.min(255,Math.round(v*f))));
+
+/* ---------- paper ---------- */
+const W=1000,H=750;
+const grain=(()=>{const g=document.createElement('canvas');g.width=g.height=160;const x=g.getContext('2d'),r=mulberry(7);for(let i=0;i<900;i++){x.fillStyle=`rgba(120,90,50,${.02+r()*.04})`;x.fillRect(r()*160,r()*160,1+r()*1.5,1+r()*1.5)}return g})();
+function paper(x){x.globalCompositeOperation='source-over';x.globalAlpha=1;x.fillStyle='#fbf6ea';x.fillRect(0,0,W,H);x.fillStyle=x.createPattern(grain,'repeat');x.fillRect(0,0,W,H)}
+
+/* ---------- the painting engine (deterministic, so co-op replays match) ----------
+   stroke = {tool:'pencil'|'charcoal'|'round'|'filbert', c:'#rrggbb', s:1-10, w:0..1 wetness at start, seed:int, p:[x,y,...] in 1000x750 } */
+const WETLEN=Infinity;
+class Painter{
+constructor(x,st){this.x=x;this.st=st;this.r=mulberry(st.seed|0);this.t=st.tool;const s=Math.max(1,Math.min(10,st.s||4));
+this.rgb=this.t=='pencil'?[64,60,68]:this.t=='charcoal'?[30,26,28]:hexRgb(st.c);
+this.rad=this.t=='pencil'?0.9+s*0.38:this.t=='charcoal'?2.4+s*1.8:this.t=='round'?2+s*2.7:4+s*3.3;
+this.w=+st.w||0;this.d=0;this.lp=null;this.wc=[];this.k=0;
+const n=this.t=='filbert'?20:16;this.br=[];
+for(let i=0;i<n;i++){if(this.t=='filbert'){this.br.push([(i/(n-1))*2-1,(this.r()-.5)*.3,.84+this.r()*.28])}else{const a=this.r()*6.283,m=Math.sqrt(this.r());this.br.push([Math.cos(a)*m,Math.sin(a)*m,.84+this.r()*.28])}}}
+wet(){return Math.max(0,this.w-this.d/WETLEN)}
+add(px,py){if(!this.lp){this.lp=[px,py];this.seg(px,py,px,py);return}const[a,b]=this.lp;this.seg(a,b,px,py);this.lp=[px,py]}
+seg(a,b,c,d){const x=this.x,r=this.r,len=Math.hypot(c-a,d-b),t=this.t,R=this.rad;
+if(t=='pencil'||t=='charcoal'){x.globalCompositeOperation='multiply';const step=Math.max(.7,R*.35),n=Math.max(1,Math.ceil(len/step));
+for(let i=0;i<=n;i++){const u=i/n,px=a+(c-a)*u,py=b+(d-b)*u;
+if(t=='pencil'){for(let j=0;j<3;j++){x.fillStyle=rgba(this.rgb,.22+r()*.3);const q=R*(r()-.5)*1.6,w=R*(r()-.5)*1.6;x.fillRect(px+q,py+w,1.1+r()*.6,1.1+r()*.6)}}
+else{const m=4+R*.7|0;for(let j=0;j<m;j++){const ang=r()*6.283,dd=R*Math.sqrt(r());x.fillStyle=rgba(this.rgb,.1+r()*.22);const sz=1+r()*2.4;x.fillRect(px+Math.cos(ang)*dd,py+Math.sin(ang)*dd*.8,sz,sz*(.6+r()))}
+if((this.k++)%4==0){x.fillStyle=rgba(this.rgb,.025);x.beginPath();x.arc(px,py,R*1.1,0,6.283);x.fill()}}}
+this.d+=len;x.globalCompositeOperation='source-over';return}
+/* brushes */
+const wet=this.wet();
+if(wet>0){/* watercolour: translucent, soft, layers like glaze */
+x.globalCompositeOperation='multiply';const step=Math.max(1,R*.16),n=Math.max(1,Math.ceil(len/step));
+for(let i=0;i<=n;i++){const u=i/n,px=a+(c-a)*u,py=b+(d-b)*u,ww=Math.max(0,this.w-(this.d+len*u)/WETLEN);
+const rr=R*(.9+.55*ww)*(.9+r()*.25),al=.028+.04*ww,jx=(r()-.5)*R*.3,jy=(r()-.5)*R*.3;
+const g=x.createRadialGradient(px+jx,py+jy,0,px+jx,py+jy,rr);g.addColorStop(0,rgba(this.rgb,al*.85));g.addColorStop(.65,rgba(this.rgb,al));g.addColorStop(.9,rgba(this.rgb,al*.5));g.addColorStop(1,rgba(this.rgb,0));
+x.fillStyle=g;x.beginPath();x.arc(px+jx,py+jy,rr,0,6.283);x.fill();
+if(r()<.5){x.fillStyle=rgba(shade(this.rgb,.8),.12+.1*ww);for(let q=0;q<3;q++){const ga=r()*6.283,gd=rr*Math.sqrt(r());x.fillRect(px+Math.cos(ga)*gd,py+Math.sin(ga)*gd,1.4,1.4)}}
+if((this.k++)%7==0)this.wc.push([px,py,ww])}
+this.d+=len;x.globalCompositeOperation='source-over';return}
+/* oils: opaque, streaky bristles */
+x.globalCompositeOperation='source-over';x.lineCap='round';const th=-.55,ca=Math.cos(th),sa=Math.sin(th);
+for(const[u,v,f]of this.br){let ox,oy;if(t=='filbert'){ox=ca*u*R+(-sa)*v*R*.35;oy=sa*u*R+ca*v*R*.35}else{ox=u*R*.62;oy=v*R*.62}
+x.strokeStyle=rgba(shade(this.rgb,f),.92);x.lineWidth=R*(t=='filbert'?.26:.5);x.beginPath();x.moveTo(a+ox,b+oy);x.lineTo(c+ox+.01,d+oy);x.stroke()}
+this.d+=len}
+end(){if(!this.wc.length)return;const x=this.x,r=this.r;x.globalCompositeOperation='multiply';
+const n=Math.min(7,2+this.wc.length);for(let i=0;i<n;i++){const[px,py,ww]=this.wc[(r()*this.wc.length)|0],rr=this.rad*(2+r()*1.5),al=.018+.02*ww;
+const g=x.createRadialGradient(px,py,0,px,py,rr);g.addColorStop(0,rgba(this.rgb,al));g.addColorStop(1,rgba(this.rgb,0));x.fillStyle=g;x.beginPath();x.arc(px+(r()-.5)*this.rad,py+(r()-.5)*this.rad,rr,0,6.283);x.fill()}
+x.globalCompositeOperation='source-over'}
+}
+function replay(x,st){const P=new Painter(x,st),p=st.p||[];for(let i=0;i+1<p.length;i+=2)P.add(p[i],p[i+1]);P.end()}
+function renderStrokes(x,list){paper(x);for(const s of list)try{replay(x,s)}catch(e){}}
+
+/* compress a canvas into a data URL small enough for one 16KB key */
+function snapshot(src,limit=13500){const sizes=[[480,360],[400,300],[320,240],[240,180]],qs=[.82,.68,.55,.42,.32];
+const t=document.createElement('canvas');let best=null;
+for(const[w,h]of sizes){t.width=w;t.height=h;const x=t.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(src,0,0,w,h);
+for(const q of qs){let u=t.toDataURL('image/webp',q);if(!u.startsWith('data:image/webp'))u=t.toDataURL('image/jpeg',q);if(u.length<=limit)return u;best=u}}
+return best}
+
+/* ---------- state ---------- */
+const S={room:'studio',mode:'solo',tool:null,color:'#c8443a',size:5,wet:0,solo:[],coopMarks:[],mine:[],turn:null,myTurn:false,turnEnd:0,name:'',sound:false};
+const cv=$('#cv'),cx=cv.getContext('2d');
+paper(cx);
+
+/* ---------- motes in the sunbeam ---------- */
+for(const id of['motesS','motesG']){const box=document.getElementById(id);for(let i=0;i<22;i++){const m=document.createElement('i');
+const l=id=='motesS'?30+Math.random()*55:5+Math.random()*60;m.style.left=l+'%';m.style.top=(Math.random()*70)+'%';
+m.style.animationDuration=(7+Math.random()*9)+'s';m.style.animationDelay=(-Math.random()*12)+'s';const s=1.5+Math.random()*2.5;m.style.width=m.style.height=s+'px';box.appendChild(m)}}
+
+/* ---------- tools ---------- */
+const GHOST={pencil:['s-pencil',150],charcoal:['s-charcoal',90],round:['s-round',190],filbert:['s-filbert',188]};
+function ghostSVG(t){const[id,L]=GHOST[t],h=L*.72+16;return`<svg viewBox="-10 ${-h+10} ${h} ${h}" width="76" height="76"><use href="#${id}" transform="rotate(135) translate(${-L} 0)"/></svg><span class="drops"></span>`}
+function pickTool(t){if(S.tool==t){S.tool=null}else{S.tool=t;if(t=='pencil'||t=='charcoal')toast(t=='pencil'?'Pencil in hand. Draw on the canvas.':'Charcoal in hand. Smudgy and soft.');else toast(S.wet>0?'Brush is wet: watercolor.':'Dry brush paints like oils. Dip it in the flower dish for watercolor.',3200)}
+$$('.tool[data-tool]').forEach(g=>g.classList.toggle('held',g.dataset.tool==S.tool));
+cv.classList.toggle('armed',!!S.tool);$('#ghost').innerHTML=S.tool?ghostSVG(S.tool):'';updDrops();updPalNote();sfx('pick')}
+$$('.tool[data-tool]').forEach(g=>{g.addEventListener('click',()=>pickTool(g.dataset.tool));g.addEventListener('keydown',e=>{if(e.key=='Enter'||e.key==' '){e.preventDefault();pickTool(g.dataset.tool)}})});
+function bump(g){g.classList.remove('pop');void g.getBBox;requestAnimationFrame(()=>g.classList.add('pop'));setTimeout(()=>g.classList.remove('pop'),520)}
+$$('.tube').forEach(g=>{const f=()=>{const was=S.wet>0;S.wet=0;updDrops();setColor(g.dataset.color,true);bump(g);sfx('pick');const nm=g.getAttribute('aria-label').replace(' paint','').toLowerCase();toast(was?'Fresh '+nm+' paint. Your brush is dry now (oils). Dip it to make it watercolor.':'A dab of '+nm+' on your brush.',3000)};g.addEventListener('click',f);g.addEventListener('keydown',e=>{if(e.key=='Enter')f()})});
+function dip(){const g=$('#dish');bump(g);const rp=$('#ripple');rp.setAttribute('opacity','1');rp.setAttribute('r','2');let k=0;const a=setInterval(()=>{k++;rp.setAttribute('r',2+k*2.5);rp.setAttribute('opacity',Math.max(0,1-k/10));if(k>10)clearInterval(a)},40);
+if(S.tool=='round'||S.tool=='filbert'){S.wet=1;updDrops();sfx('dip');toast('Dipped! Watercolor until you pick up a new paint tube.',3000)}
+else if(S.tool){toast(S.tool=='pencil'?'Pencils do not love water.':'Charcoal + water = mud. Maybe not.')}else toast('Pick up a brush, then dip it here.');}
+$('#dish').addEventListener('click',dip);$('#dish').addEventListener('keydown',e=>{if(e.key=='Enter')dip()});
+function updDrops(){const d=$('#ghost .drops');if(!d)return;const b=S.tool=='round'||S.tool=='filbert';d.textContent=b&&S.wet>0?'💧':''}
+
+/* mug: breathe with the steam (4s in, 6s out) */
+let breathing=false;function mug(){bump($('#mug'));if(breathing)return;breathing=true;const st=$('#steam'),b=$('#breath');let n=0;
+const cyc=()=>{if(n++>=3){b.style.opacity=0;st.style.transition='transform 2s';st.style.transform='';breathing=false;return}
+b.textContent='breathe in…';b.style.opacity=1;st.style.transformOrigin='726px 890px';st.style.transition='transform 4s ease-in-out';st.style.transform='scale(1.25,1.6)';
+setTimeout(()=>{b.textContent='…and slowly out';st.style.transition='transform 6s ease-in-out';st.style.transform='scale(1,1)';setTimeout(cyc,6000)},4000)};cyc()}
+$('#mug').addEventListener('click',mug);$('#mug').addEventListener('keydown',e=>{if(e.key=='Enter')mug()});
+
+/* ---------- colour wheel dropdown ---------- */
+const wh=$('#wheel'),wx=wh.getContext('2d');let hue=8,sat=.72,val=.8;
+(function drawWheel(){const R=170,img=wx.createImageData(340,340);for(let y=0;y<340;y++)for(let x=0;x<340;x++){const dx=x-R,dy=y-R,d=Math.hypot(dx,dy);if(d>R)continue;const h=(Math.atan2(dy,dx)*180/Math.PI+360)%360,s=d/R;const[r,g,b]=hsv(h,s,1),i=(y*340+x)*4;img.data[i]=r;img.data[i+1]=g;img.data[i+2]=b;img.data[i+3]=255}wx.putImageData(img,0,0)})();
+function hsv(h,s,v){const f=n=>{const k=(n+h/60)%6;return Math.round(255*(v-v*s*Math.max(0,Math.min(k,4-k,1))))};return[f(5),f(3),f(1)]}
+function toHex(r,g,b){return'#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('')}
+function fromHex(h){const[r,g,b]=hexRgb(h).map(v=>v/255),mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let hh=0;if(d){if(mx==r)hh=((g-b)/d)%6;else if(mx==g)hh=(b-r)/d+2;else hh=(r-g)/d+4}return[(hh*60+360)%360,mx?d/mx:0,mx]}
+function placeKnob(){const a=hue*Math.PI/180,k=$('#knob');k.style.left=(85+Math.cos(a)*sat*85)+'px';k.style.top=(85+Math.sin(a)*sat*85)+'px';k.style.background=toHex(...hsv(hue,sat,1))}
+function setColor(h,fromTube){S.color=h;if(fromTube){[hue,sat,val]=fromHex(h);$('#val').value=Math.round(val*100);placeKnob()}$('#sw').style.background=h}
+function fromWheel(e){const r=wh.getBoundingClientRect(),dx=e.clientX-r.left-r.width/2,dy=e.clientY-r.top-r.height/2;hue=(Math.atan2(dy,dx)*180/Math.PI+360)%360;sat=Math.min(1,Math.hypot(dx,dy)/(r.width/2));placeKnob();setColor(toHex(...hsv(hue,sat,val)))}
+let wDrag=false;wh.addEventListener('pointerdown',e=>{wDrag=true;wh.setPointerCapture(e.pointerId);fromWheel(e)});wh.addEventListener('pointermove',e=>{if(wDrag)fromWheel(e)});wh.addEventListener('pointerup',()=>{wDrag=false;sfx('pick')});
+$('#val').addEventListener('input',e=>{val=e.target.value/100;setColor(toHex(...hsv(hue,sat,val)))});
+$('#size').addEventListener('input',e=>{S.size=+e.target.value;szDot()});
+function szDot(){const i=$('#szdot i'),p=4+S.size*2.4;i.style.width=i.style.height=p+'px'}
+function updPalNote(){$('#palNote').textContent=S.tool=='pencil'||S.tool=='charcoal'?'Pencil and charcoal are graphite and soot. Colors are for brushes.':S.tool?'Dry brush = oils. Dip in the flower dish = watercolor, until you tap a new tube.':'Paint tubes on the table are quick colors too.'}
+$('#palBtn').addEventListener('click',e=>{e.stopPropagation();const o=$('#pal').classList.toggle('open');$('#palBtn').setAttribute('aria-expanded',o)});
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('#pal,#palBtn'))$('#pal').classList.remove('open')});
+setColor(S.color,true);szDot();
+
+/* ---------- drawing on the canvas ---------- */
+let cur=null,curP=null,lastPt=null;
+function pt(e){const r=cv.getBoundingClientRect();return[Math.round((e.clientX-r.left)*W/r.width),Math.round((e.clientY-r.top)*H/r.height)]}
+function moveGhost(e){const g=$('#ghost'),vr=$('#viewport').getBoundingClientRect();if(!S.tool){g.style.display='none';return}g.style.display='block';g.style.left=(e.clientX-vr.left-4)+'px';g.style.top=(e.clientY-vr.top-70)+'px'}
+cv.addEventListener('pointermove',e=>{moveGhost(e);if(!cur)return;const p=pt(e);if(Math.hypot(p[0]-lastPt[0],p[1]-lastPt[1])<3)return;lastPt=p;cur.p.push(p[0],p[1]);curP.add(p[0],p[1])});
+cv.addEventListener('pointerleave',e=>{if(!cur)$('#ghost').style.display='none'});
+cv.addEventListener('pointerdown',async e=>{moveGhost(e);if(!S.tool){toast('Pick up a pencil, charcoal or brush from the table first ↓');return}
+if(S.mode=='coop'&&!(await coopCanStart()))return;
+cv.setPointerCapture(e.pointerId);const p=pt(e);lastPt=p;
+const brush=S.tool=='round'||S.tool=='filbert';
+cur={tool:S.tool,c:S.color,s:S.size,w:brush?+S.wet.toFixed(3):0,seed:(Math.random()*1e9)|0,p:[p[0],p[1]]};curP=new Painter(cx,cur);curP.add(p[0],p[1])});
+function endStroke(){if(!cur)return;curP.end();if(cur.w>0){S.wet=+Math.max(0,curP.wet()).toFixed(3);updDrops();}
+(S.mode=='coop'?S.mine:S.solo).push(cur);cur=null;curP=null;sfx('stroke')}
+cv.addEventListener('pointerup',endStroke);cv.addEventListener('pointercancel',endStroke);
+function redrawSolo(){renderStrokes(cx,S.solo)}
+$('#undoBtn').addEventListener('click',()=>{if(S.mode=='coop'){if(!S.myTurn)return;S.mine.pop();drawCoop()}else{S.solo.pop();redrawSolo()}});
+$('#newBtn').addEventListener('click',()=>{if(!S.solo.length)return;openModal(`<h2>Start fresh?</h2><p>This clears your canvas. Anything you have published stays on the wall.</p><div class="acts"><button class="btn" onclick="closeModal()">keep painting</button><button class="btn pri" id="okNew">fresh canvas</button></div>`);$('#okNew').onclick=()=>{S.solo=[];redrawSolo();closeModal()}});
+
+/* ---------- names (no accounts here, so we just ask) ---------- */
+function askName(why){return new Promise(res=>{if(S.name)return res(S.name);openModal(`<h2>What should we call you?</h2><p class="meta">${esc(why)}</p><label for="nm">Your name</label><input id="nm" maxlength="24" autocomplete="nickname" placeholder="e.g. jellycrab"><div class="acts"><button class="btn" id="nmNo">cancel</button><button class="btn pri" id="nmOk">that's me</button></div>`);
+const ok=()=>{const v=$('#nm').value.trim().slice(0,24);if(!v){$('#nm').focus();return}S.name=v;closeModal();res(v)};$('#nmOk').onclick=ok;$('#nm').onkeydown=e=>{if(e.key=='Enter')ok()};$('#nmNo').onclick=()=>{closeModal();res(null)};setTimeout(()=>$('#nm').focus(),50)})}
+
+/* ---------- modal ---------- */
+function openModal(h){$('#card').innerHTML=h;$('#modal').classList.add('on')}
+function closeModal(){$('#modal').classList.remove('on')}
+$('#modal').addEventListener('pointerdown',e=>{if(e.target.id=='modal')closeModal()});
+document.addEventListener('keydown',e=>{if(e.key=='Escape')closeModal()});
+
+/* ---------- publish ---------- */
+$('#pubBtn').addEventListener('click',()=>{if(!S.solo.length){toast('Make a mark first. Anything at all.');return}
+openModal(`<h2>Hang it in the gallery</h2><img class="big" src="${cv.toDataURL('image/jpeg',.8)}" alt=""><label for="pt">Title</label><input id="pt" maxlength="60" placeholder="Untitled (and that's okay)"><label for="pa">About <span class="note">(optional)</span></label><textarea id="pa" maxlength="280" placeholder="What were you thinking about? What does it hold?"></textarea><label for="pn">Signed</label><input id="pn" maxlength="24" value="${esc(S.name)}" placeholder="your name"><div class="acts"><button class="btn" onclick="closeModal()">not yet</button><button class="btn pri" id="pGo">publish ✦</button></div>`);
+$('#pGo').onclick=async()=>{const n=$('#pn').value.trim().slice(0,24);if(!n){$('#pn').focus();toast('Sign your work');return}S.name=n;$('#pGo').disabled=true;
+const img=snapshot(cv);const id=rid();const art={t:$('#pt').value.trim().slice(0,60)||'Untitled',a:$('#pa').value.trim().slice(0,280),by:n,kind:'human',at:Date.now(),img};
+try{await C.set('art:'+id,art);closeModal();sfx('pub');toast('Hung on the gallery wall ✦ go see it one room over',3200);await loadWall()}catch(e){$('#pGo').disabled=false;toast('Could not publish just now. Try again?')}}});
+
+/* ---------- rooms ---------- */
+function goRoom(r){S.room=r;$('#rooms').classList.toggle('gal',r=='gallery');$('#ghost').style.display='none';$('#pal').classList.remove('open');if(r=='gallery'){loadWall();loadPreview()}sfx('step')}
+function setMode(m){S.mode=m;const co=m=='coop';$('#mode').style.display=co?'block':'none';$('#hg').style.display=co?'block':'none';$('#status').style.display=co?'block':'none';
+$('#logBtn').style.display=co?'inline-block':'none';$('#pubBtn').style.display=co?'none':'inline-block';$('#newBtn').style.display=co?'none':'inline-block';
+$('#undoBtn').style.display=co?'none':'inline-block';
+if(co){drawCoop();refreshCoop()}else redrawSolo()}
+const onKey=(el,f)=>{el.addEventListener('click',f);el.addEventListener('keydown',e=>{if(e.key=='Enter'||e.key==' '){e.preventDefault();f()}})};
+onKey($('#signGal'),()=>{if(S.mode=='coop'&&S.myTurn){toast('Finish your mark first!');return}goRoom('gallery')});
+onKey($('#signStudio'),()=>{setMode('solo');goRoom('studio')});
+onKey($('#coopEasel'),()=>{const v=$('#viewport');v.style.transition='opacity .35s';v.style.opacity=0;setTimeout(()=>{$('#rooms').style.transition='none';setMode('coop');goRoom('studio');requestAnimationFrame(()=>{$('#rooms').style.transition='';v.style.opacity=1})},380)});
+onKey($('#book'),()=>openModal(`<h2>About the cottage</h2>
+<p>A quiet little place for making things. Stay as long as you like.</p>
+<p><b>Paint on your own.</b> Pick up a pencil, charcoal or brush from the table and it floats up to become your cursor. Brushes paint like oils, or dip one in the flower dish for watercolor. Colors and size are in the dropdown.</p>
+<p><b>Visit the gallery.</b> Hang your painting next door, wander the wall, and leave something kind on what others made.</p>
+<p><b>Paint together.</b> The cat's co-op easel takes one mark at a time, ten seconds each. Each day's shared painting goes up on the wall at midnight (Pacific).</p>
+<p><b>Take a breath.</b> Click the mug and breathe along with the steam.</p>
+<div class="about">Why art? Making something with your hands, even a scribble, can help quiet a busy mind. Large research reviews, including one by the World Health Organization, link creative activities with lower stress and better mood. It doesn't take talent: the good part is the doing, not the result. That's why there are no scores, levels or wrong marks here.</div>
+<p class="meta">A cozy creative space, not a substitute for therapy or care.</p><div class="acts"><button class="btn pri" onclick="closeModal()">lovely</button></div>`));
+
+/* ---------- gallery wall ---------- */
+let WALL=[],page=0;const PER=12,cacheImg={};
+function artImg(a){if(a.img)return a.img;if(cacheImg[a.id])return cacheImg[a.id];if(Array.isArray(a.strokes)){const t=document.createElement('canvas');t.width=W;t.height=H;renderStrokes(t.getContext('2d'),a.strokes);return cacheImg[a.id]=snapshot(t,60000)}return''}
+async function loadWall(){try{const[arts,days]=await Promise.all([C.all('art:'),C.all('daily:')]);
+WALL=[...Object.entries(arts).map(([k,v])=>({...v,id:k.slice(4),daily:false})),...Object.entries(days).map(([k,v])=>({...v,id:'daily-'+k.slice(6),daily:true,at:v.at||Date.parse(v.day)}))].filter(a=>a&&(a.img||a.strokes)).sort((a,b)=>b.at-a.at);
+drawWall()}catch(e){}}
+function drawWall(){const box=$('#wall'),n=WALL.length;$('#empty').style.display=n?'none':'block';const pages=Math.ceil(n/PER);page=Math.min(page,Math.max(0,pages-1));
+$('#wallnav').style.display=pages>1?'flex':'none';$('#wPrev').disabled=page==0;$('#wNext').disabled=page>=pages-1;
+const items=WALL.slice(page*PER,page*PER+PER),k=items.length,w=k<=2?36:k<=4?27:k<=6?24:k<=9?19:16.5;
+box.innerHTML=items.map((a,i)=>`<div class="frm ${a.daily?'daily':''}" style="width:${w}%;transform:rotate(${((i*37)%7-3)*.6}deg)" data-i="${page*PER+i}" tabindex="0" role="button" aria-label="${esc(a.daily?'Co-op painting':a.t)}"><div class="mat"><img src="${artImg(a)}" alt=""></div>${a.daily?`<span class="plq">co-op</span>`:''}</div>`).join('');
+$$('.frm').forEach(f=>{const o=()=>openArt(WALL[+f.dataset.i]);f.onclick=o;f.onkeydown=e=>{if(e.key=='Enter')o()}})}
+$('#wPrev').onclick=()=>{page--;drawWall()};$('#wNext').onclick=()=>{page++;drawWall()};
+async function openArt(a){sfx('pick');const title=a.daily?'Co-op canvas':a.t,by=a.daily?(a.artists||[]).map(p=>esc(p.by)+(p.kind=='agent'?'<span class="badge">agent</span>':'')).join(', '):esc(a.by)+(a.kind=='agent'?'<span class="badge">agent</span>':'');
+openModal(`<h2>${esc(title)}</h2><div class="meta">${a.daily?`${esc(fmtDay(a.day))} · ${a.marks||0} marks by ${by||'friends'}`:`by ${by} · ${esc(fmtTime(a.at))}`}</div><img class="big ${a.daily?'daily':''}" src="${artImg(a)}" alt="${esc(title)}">${!a.daily&&a.a?`<div class="about">${esc(a.a)}</div>`:''}
+<h3 class="hand" style="font-size:22px;margin:14px 0 4px;font-weight:400">kind words</h3><div id="cms"><p class="note">gathering…</p></div>
+<label for="ct">Say something nice!</label><textarea id="ct" maxlength="200" placeholder="I love the way the light…"></textarea><input id="cn" maxlength="24" placeholder="your name" value="${esc(S.name)}" style="margin-top:6px">
+<div class="acts"><button class="btn" onclick="closeModal()">back to the wall</button><button class="btn pri" id="cGo">leave a note</button></div>`);
+const loadC=async()=>{const o=await C.all('cmt:'+a.id+':');const l=Object.values(o).sort((x,y)=>x.at-y.at);$('#cms').innerHTML=l.length?l.map(c=>`<div class="cm"><b>${esc(c.by)}</b>${c.kind=='agent'?'<span class="badge">agent</span>':''} <span class="note">${esc(fmtTime(c.at))}</span><br>${esc(c.text)}</div>`).join(''):'<p class="note">No notes yet. Be the first to say something kind.</p>'};
+loadC();$('#cGo').onclick=async()=>{const t=$('#ct').value.trim().slice(0,200),n=$('#cn').value.trim().slice(0,24);if(!t){$('#ct').focus();return}if(!n){$('#cn').focus();toast('Add your name');return}S.name=n;$('#cGo').disabled=true;
+try{await C.set('cmt:'+a.id+':'+rid(),{by:n,kind:'human',text:t,at:Date.now()});$('#ct').value='';sfx('pub');await loadC()}catch(e){toast('That note did not stick. Try again?')}$('#cGo').disabled=false}}
+
+/* ---------- co-op ---------- */
+const TURN=10000;
+function hgSVG(f){return`<svg viewBox="-30 -66 60 132" style="transform:rotate(${f?180:0}deg)"><rect x="-27" y="-64" width="54" height="10" rx="3" fill="#7a4e2c"/><rect x="-27" y="54" width="54" height="10" rx="3" fill="#7a4e2c"/><path d="M-22-56V56M22-56V56" stroke="#7a4e2c" stroke-width="5"/><circle cx="-22" cy="-56" r="4" fill="#5a3a22"/><circle cx="22" cy="-56" r="4" fill="#5a3a22"/><circle cx="-22" cy="56" r="4" fill="#5a3a22"/><circle cx="22" cy="56" r="4" fill="#5a3a22"/>
+<path d="M-16-54Q-16-12 0-4Q16-12 16-54Z M-16 54Q-16 4 0-4Q16 4 16 54Z" fill="#eef7fa" opacity=".85" stroke="#b9cfd6" stroke-width="1.5"/>
+<clipPath id="ct1"><path d="M-16-54Q-16-12 0-4Q16-12 16-54Z"/></clipPath><clipPath id="cb1"><path d="M-16 54Q-16 4 0-4Q16 4 16 54Z"/></clipPath>
+<rect id="sTop" clip-path="url(#ct1)" x="-16" y="-30" width="32" height="26" fill="#e3c27a"/><rect id="sBot" clip-path="url(#cb1)" x="-16" y="54" width="32" height="0" fill="#e3c27a"/><rect id="sStream" x="-1" y="-4" width="2" height="58" fill="#e3c27a" opacity="0"/></svg>`}
+$('#hg').innerHTML=hgSVG(false);
+function setSand(f,running){const top=$('#sTop'),bot=$('#sBot'),st=$('#sStream');if(!top)return;const tH=26*(1-f),bH=26*f;top.setAttribute('y',-4-tH);top.setAttribute('height',tH);bot.setAttribute('y',54-bH);bot.setAttribute('height',bH);st.setAttribute('opacity',running?.9:0)}
+const coopBase=document.createElement('canvas');coopBase.width=W;coopBase.height=H;const cbx=coopBase.getContext('2d');paper(cbx);let baseIds='';
+function drawCoopBase(){const ids=S.coopMarks.map(m=>m.id).join(',');if(ids==baseIds)return;
+if(baseIds&&ids.startsWith(baseIds)){const done=new Set(baseIds.split(','));for(const m of S.coopMarks)if(!done.has(m.id))for(const s of m.strokes||[])try{replay(cbx,s)}catch(e){}}
+else{paper(cbx);for(const m of S.coopMarks)for(const s of m.strokes||[])try{replay(cbx,s)}catch(e){}}baseIds=ids}
+function drawCoop(){drawCoopBase();if(S.mode!='coop')return;cx.globalCompositeOperation='source-over';cx.drawImage(coopBase,0,0);for(const s of S.mine)replay(cx,s)}
+async function fetchCoop(){const today=dayKey();const[marks,turn]=await Promise.all([C.list('coop:m:'+today+':'),C.get('coop:turn')]);
+S.coopMarks=marks.map(m=>({...m.value,id:m.key})).filter(m=>m&&Array.isArray(m.strokes)).sort((a,b)=>a.at-b.at||(a.id<b.id?-1:1));S.turn=turn}
+function turnActive(t){return t&&!t.done&&Date.now()-t.start<TURN+2500}
+function lastBy(){const m=S.coopMarks[S.coopMarks.length-1];return m?m.by:null}
+async function refreshCoop(){try{await fetchCoop()}catch(e){return}drawCoop();coopUI()}
+function coopUI(){if(S.mode!='coop')return;const st=$('#status'),t=S.turn,me=S.name;
+if(S.myTurn){const left=Math.max(0,Math.ceil((S.turnEnd-Date.now())/1000));st.textContent=`Your mark! ${left}s of sand left`;return}
+if(turnActive(t)){st.textContent=`${t.by}${t.kind=='agent'?' (agent)':''} is painting… wait for the sand.`;$('#hg svg').style.transform='rotate(180deg)';setSand(Math.min(1,(Date.now()-t.start)/TURN),true);return}
+$('#hg svg').style.transform='rotate(0deg)';setSand(0,false);
+if(S.coopMarks.length>=300){st.textContent='The canvas is full for today. Fresh one at midnight!';return}
+if(me&&lastBy()==me){st.textContent='You made the last mark. Wait for someone else to go.';return}
+st.textContent=S.coopMarks.length?`Your turn is free. Touch the canvas to flip the hourglass.`:`A fresh canvas! Touch it to make the first mark.`}
+async function coopCanStart(){if(S.myTurn)return true;
+const n=await askName('Your name goes in the co-op log next to your mark.');if(!n)return false;
+await refreshCoop();if(turnActive(S.turn)&&S.turn.by!==n){toast(`${S.turn.by} has the hourglass. Wait for the sand!`);return false}
+if(lastBy()==n){toast('You made the last mark. Someone else goes next!');return false}
+if(S.coopMarks.length>=300){toast('Full for today. Come back after midnight!');return false}
+const claim={by:n,kind:'human',start:Date.now(),day:dayKey()};await C.set('coop:turn',claim);
+await new Promise(r=>setTimeout(r,350));const chk=await C.get('coop:turn');if(!chk||chk.by!==n||chk.start!==claim.start){toast('Someone grabbed the hourglass first!');refreshCoop();return false}
+startTurn(claim);return true}
+let turnTimer=null;
+function startTurn(claim){S.myTurn=true;S.mine=[];S.turnEnd=claim.start+TURN;sfx('flip');$('#hg svg').style.transform='rotate(180deg)';$('#undoBtn').style.display='inline-block';toast('The hourglass flipped! 10 seconds. Make your mark ✎');
+clearInterval(turnTimer);turnTimer=setInterval(()=>{const f=Math.min(1,1-(S.turnEnd-Date.now())/TURN);setSand(f,true);coopUI();if(Date.now()>=S.turnEnd){clearInterval(turnTimer);finishTurn()}},120)}
+async function finishTurn(){if(cur)endStroke();S.myTurn=false;$('#undoBtn').style.display='none';setSand(1,false);const strokes=S.mine.slice();S.mine=[];
+const day=dayKey(S.turnEnd-TURN);
+if(strokes.length){let mark={by:S.name,kind:'human',at:Date.now(),day,strokes};
+let j=JSON.stringify(mark);while(j.length>15500){mark.strokes=mark.strokes.map(s=>({...s,p:s.p.filter((_,i)=>i%4<2||i>=s.p.length-2)}));const nj=JSON.stringify(mark);if(nj.length>=j.length)break;j=nj}
+try{await C.set('coop:m:'+day+':'+rid(),mark);sfx('pub');toast('Your mark is in! Someone else goes next.')}catch(e){toast('Your mark did not save. Sorry!')}}
+else toast('The sand ran out. No mark this time.');
+try{await C.set('coop:turn',{by:S.name,kind:'human',start:S.turnEnd-TURN,day,done:true})}catch(e){}refreshCoop()}
+$('#logBtn').addEventListener('click',()=>{const l=S.coopMarks.slice().reverse();openModal(`<h2>Today's marks</h2><div class="meta">${esc(fmtDay(dayKey()))} · resets at midnight (Pacific) and goes up on the gallery wall</div>${l.length?`<ol class="log" reversed>${l.map(m=>`<li><b>${esc(m.by)}</b>${m.kind=='agent'?'<span class="badge">agent</span>':''} · ${new Date(m.at).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})} · ${esc((m.strokes||[]).map(s=>s.tool).filter((v,i,a)=>a.indexOf(v)==i).join(', '))}</li>`).join('')}</ol>`:'<p>No marks yet today. Yours could be the first.</p>'}<div class="acts"><button class="btn pri" onclick="closeModal()">back to the easel</button></div>`)});
+
+/* daily roll-over: any visitor hangs yesterday's co-op canvas and clears the old marks */
+let rolling=false;
+async function rollover(){if(rolling)return;rolling=true;try{const today=dayKey(),all=await C.list('coop:m:'),by={};
+for(const m of all){const d=m.key.split(':')[2];if(d&&d<today)(by[d]=by[d]||[]).push({...m.value,key:m.key})}
+for(const d of Object.keys(by).sort()){const marks=by[d].filter(m=>m&&Array.isArray(m.strokes)).sort((a,b)=>a.at-b.at);
+if(marks.length&&!(await C.get('daily:'+d))){const t=document.createElement('canvas');t.width=W;t.height=H;const x=t.getContext('2d');paper(x);for(const m of marks)for(const s of m.strokes)try{replay(x,s)}catch(e){}
+const seen=new Map();for(const m of marks)if(!seen.has(m.by))seen.set(m.by,{by:m.by,kind:m.kind||'human'});
+await C.set('daily:'+d,{day:d,img:snapshot(t,14000),marks:marks.length,artists:[...seen.values()].slice(0,40),at:Date.parse(d+'T23:59:00-08:00')})}
+for(const m of by[d])await C.del(m.key)}}catch(e){}rolling=false}
+
+async function loadPreview(){try{await fetchCoop();drawCoopBase();$('#preview').src=coopBase.toDataURL('image/jpeg',.7)}catch(e){}}
+
+/* ---------- live updates ---------- */
+let chT=0;C.onChange(()=>{clearTimeout(chT);chT=setTimeout(()=>{if(S.room=='gallery'){loadWall();loadPreview()}if(S.mode=='coop'&&!S.myTurn)refreshCoop()},500)});
+setInterval(()=>{if(S.mode=='coop'&&!S.myTurn)coopUI()},500);
+setInterval(()=>{if(S.mode=='coop'&&!S.myTurn)refreshCoop()},8000);
+setInterval(rollover,60000);
+
+/* ---------- gentle sound (off by default) ---------- */
+let AC,amb;function ac(){AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state=='suspended')AC.resume();return AC}
+function tone(f,d=.25,v=.05,type='sine'){if(!S.sound)return;const a=ac(),t=a.currentTime,o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.05)}
+function sfx(k){if(!S.sound)return;({pick:()=>tone(660,.18,.04),dip:()=>{tone(880,.3,.04);setTimeout(()=>tone(1175,.4,.03),90)},stroke:()=>tone(330,.12,.015,'triangle'),pub:()=>[523,659,784].forEach((f,i)=>setTimeout(()=>tone(f,.5,.05),i*120)),step:()=>tone(392,.25,.03,'triangle'),flip:()=>[784,587].forEach((f,i)=>setTimeout(()=>tone(f,.3,.05),i*140))}[k]||(()=>0))()}
+$('#sndBtn').addEventListener('click',()=>{S.sound=!S.sound;$('#sndBtn').textContent=S.sound?'♪ on':'♪ off';clearInterval(amb);if(S.sound){ac();const sc=[262,294,330,392,440,523];const play=()=>{const a=ac(),t=a.currentTime,o=a.createOscillator(),g=a.createGain();o.type='triangle';o.frequency.value=sc[(Math.random()*6)|0]*(Math.random()<.3?.5:1);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.035,t+1.5);g.gain.linearRampToValueAtTime(0,t+5);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+5.2)};play();amb=setInterval(play,3600)}});
+
+/* ---------- start ---------- */
+rollover();loadWall();
+setTimeout(()=>toast('Pick something up from the table to start ✎',3400),900);
+</script>
+</body>
+</html>
