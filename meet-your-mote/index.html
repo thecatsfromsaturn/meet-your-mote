@@ -194,8 +194,8 @@ function drawMug(x,cx,by,s){const w=Math.round(4*s),h=Math.round(4*s),l=Math.rou
 px(x,'#8fa58a',l,top,w,h);px(x,'#7d9579',l,by-hs,w,hs);px(x,'#a9bda4',l+hs,top+hs,hs,Math.max(1,h-hs*2-1));
 px(x,'#e9e1d0',l,top-hs,w,hs);px(x,'#7a4e2c',l+hs,top-hs,Math.max(1,w-hs*2),hs);
 px(x,'#7d9579',l+w,hy,hs*2,hs);px(x,'#7d9579',l+w+hs,hy,hs,hh);px(x,'#7d9579',l+w,hy+hh-hs,hs*2,hs)}
-/* ---------- breathe with Mote: tap the mug, 4 s in, 6 s out, tap again to finish ---------- */
-const BR={down:1400,inh:4000,exh:6000,up:1300};
+/* ---------- breathe with Mote: tap the mug, equal breathing: 4 s in, 4 s out, tap again to finish ---------- */
+const BR={down:1400,inh:4000,exh:4000,up:1300};
 const ease=u=>u<0?0:u>1?1:.5-.5*Math.cos(u*Math.PI);
 const MUG_SHELF=[8,17,1],MUG_FRONT=[32,57,2];
 function startBreath(){if(S.phase=='dust'||S.br)return;ac();S.br={phase:'down',t0:performance.now(),hint:$('#hint').textContent};S.steam=[];S.ev=null;
