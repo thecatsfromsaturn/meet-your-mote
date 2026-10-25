@@ -64,8 +64,8 @@ footer{text-align:center;font-size:12px;color:var(--soft);margin-top:22px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 /* open on a desk: a wall and a wood desktop behind, the base tilted back like an open compact resting on the table */
 body{background:linear-gradient(#efe3cc 0 46%,#b98a5a 46% 47%,#c99a66 47%,#a87447 100%) fixed}
-main{perspective:1100px}.lid{z-index:2}.hinge{z-index:3}
-.compact{margin-top:10px}
+/* the perspective lives on the compact so the tilt never shifts when panels open below */
+.compact{margin-top:10px;perspective:1100px}.lid{z-index:2}.base{z-index:4;touch-action:none;cursor:grab}.hinge{z-index:5}
 .lid{transform:scaleY(.98);box-shadow:inset 0 -8px 16px #c9ad8088,inset 0 6px 12px #fff,0 10px 0 #dcc49a,0 13px 0 #c2a578}
 .base{transform:rotateX(52deg) scaleY(.92);transform-origin:50% 0;margin-top:-4%;box-shadow:inset 0 -8px 16px #c9ad8088,inset 0 6px 12px #fff,0 14px 0 #d5bb8e,0 18px 0 #b8996b,0 40px 40px #4a2e1866}
 .hinge{width:40%;height:22px;border-radius:11px;background:linear-gradient(#fffaf0,#e5d2ae 40%,#bfa27a 80%,#a88a62);box-shadow:0 4px 8px #4a2e1844}
@@ -211,7 +211,7 @@ const ease=u=>u<0?0:u>1?1:.5-.5*Math.cos(u*Math.PI);
 const MUG_SHELF=[8,17,1],MUG_FRONT=[32,57,2];
 function startBreath(){if(S.phase=='dust'||S.br)return;if(S.scene!='room')goRoom();ac();S.br={phase:'down',t0:performance.now(),hint:$('#hint').textContent};S.steam=[];S.ev=null;
 $('#hint').textContent="He's settling in…";$('#padTxt').textContent='tap to finish';$('#padTxt').style.opacity=1}
-function endBreath(){if(!S.br||S.br.phase=='up')return;S.br.phase='up';S.br.t2=performance.now();$('#hint').textContent=S.br.hint;$('#padTxt').textContent='tap him'}
+function endBreath(){if(!S.br||S.br.phase=='up')return;S.br.phase='up';S.br.t2=performance.now();$('#hint').textContent=S.br.hint;$('#padTxt').textContent='slide, let go to tap'}
 function mugAt(t){const b=S.br;let u,from,to;if(b.phase=='down'){u=ease((t-b.t0)/BR.down);from=MUG_SHELF;to=MUG_FRONT}else if(b.phase=='up'){u=ease((t-b.t2)/BR.up);from=MUG_FRONT;to=MUG_SHELF}else return{x:MUG_FRONT[0],y:MUG_FRONT[1]+Math.round(Math.sin(t/900)*.4),s:2};
 const arc=Math.sin(u*Math.PI)*-6;return{x:from[0]+(to[0]-from[0])*u,y:from[1]+(to[1]-from[1])*u+arc,s:from[2]+(to[2]-from[2])*u}}
 /* where we are in the breath: returns {k:'in'|'out', u:0..1} */
@@ -301,7 +301,7 @@ S.ev={k:'wow',t:performance.now(),d:1600};chirp(S.shown||DEFAULT);
 for(let i=0;i<26;i++)S.sparks.push({x:32,y:26,vx:Math.cos(i)*(.4+Math.random()*.6),vy:Math.sin(i)*(.4+Math.random()*.6),c:i%2?'#fff3b0':'#f6c945',t:performance.now(),l:800+Math.random()*500});
 toast(`Ooh, a ${TOPPERS[id]}! He's wearing it.`+(first?' A little hatch just appeared in his ceiling.':''),first?4200:2800);
 if(S.g)renderCert(S.mine,S.g,S.certMode);return true}
-function goAttic(){if(!hatchOn()||S.br)return;S.scene='attic';$('#padTxt').textContent='tap him';
+function goAttic(){if(!hatchOn()||S.br)return;S.scene='attic';$('#padTxt').textContent='slide, let go to tap';
 if(!S.mine.attic){makeDust();S.atticDust=true;S.wokeAt=null;$('#hint').textContent='The attic is so dusty. Clear it off.'}else $('#hint').textContent='The dusty attic. Tap a topper to try it on.'}
 function atticClear(){S.atticDust=false;S.wokeAt=performance.now();S.atticAt=S.wokeAt;for(const d of dust){if(!d.gone){const a=Math.random()*6.28;d.vx+=Math.cos(a)*.6;d.vy+=Math.sin(a)*.6-.3}}
 S.mine.attic=true;saveMine();S.ev={k:'ohhi',t:performance.now()+200,d:1600};setTimeout(()=>chirp(S.shown||DEFAULT),550);$('#hint').textContent='The dusty attic. Tap a topper to try it on.'}
@@ -328,8 +328,10 @@ if(dustOn()||dust.some(d=>!d.gone)){for(const d of dust){if(d.gone)continue;d.x+
 if(!dustOn()){d.vy+=.09;d.vx+=(Math.random()-.5)*.08;d.vx*=1.08;d.vy*=1.08}
 if(d.x<-3||d.x>67||d.y<-3||d.y>67){d.gone=true;continue}
 const wob=Math.sin(t/900+d.dw)*.15;const fa=S.wokeAt?Math.max(0,1-(t-S.wokeAt)/1400):1;if(fa<=0){d.gone=true;continue}sx.globalAlpha=fa;sx.fillStyle=d.c;sx.fillRect((d.x+wob)|0,d.y|0,d.s,d.s);sx.globalAlpha=1}}
-if(S.phase=='dust'&&++dustTick%10==0&&dustLeft()<.32)wake();
-if(S.atticDust&&++dustTick%10==0&&dustLeft()<.32)atticClear();
+if(S.phase=='dust'&&++dustTick%10==0&&dustLeft()<.4)wake();
+if(S.atticDust&&++dustTick%10==0&&dustLeft()<.4)atticClear();
+/* where your finger is on the pad, shown on the screen */
+if(S.cur){const a=S.cur.on?1:Math.max(0,1-(t-S.cur.t)/500);if(a>0){const cx=Math.round(S.cur.x),cy=Math.round(S.cur.y);sx.globalAlpha=a*.9;px(sx,'#4a3424',cx-2,cy-1,1,3);px(sx,'#4a3424',cx+2,cy-1,1,3);px(sx,'#4a3424',cx-1,cy-2,3,1);px(sx,'#4a3424',cx-1,cy+2,3,1);sx.globalAlpha=a;px(sx,'#fffaf0',cx-1,cy-1,3,3);px(sx,'#f6c945',cx,cy,1,1);sx.globalAlpha=1}}
 requestAnimationFrame(frame)}
 requestAnimationFrame(frame);
 
@@ -347,11 +349,19 @@ if(S.scene=='room'&&first&&hatchOn()&&p[0]>=1&&p[0]<=15&&p[1]<9.5){goAttic();ret
 if(S.scene=='room'&&first&&p[0]>=10.5&&p[0]<=15.5&&p[1]>=10&&p[1]<=18&&isMine()){if(!give('carrot'))for(let i=0;i<6;i++)S.sparks.push({x:13,y:13,vx:Math.random()-.5,vy:-Math.random(),c:'#9cc98a',t:performance.now(),l:600});else for(let i=0;i<10;i++)S.sparks.push({x:13,y:13,vx:Math.random()-.5,vy:-Math.random(),c:'#f08a3c',t:performance.now(),l:800});return}
 if(S.scene=='room'&&first&&p[0]>=3&&p[0]<=10.5&&p[1]>=7&&p[1]<=19){startBreath();return}
 if(S.scene=='room'&&first&&p[0]>46&&p[1]>30&&p[1]<50){S.cat=performance.now();mrrp()}else if(first&&Math.abs(p[0]-32)<16&&p[1]>28&&p[1]<54){S.ev={k:'tap',t:performance.now(),d:700};chirp(S.shown||DEFAULT)}else if(first){for(let i=0;i<6;i++)S.sparks.push({x:p[0],y:p[1],vx:Math.random()-.5,vy:Math.random()-.5,c:'#fff3b0',t:performance.now(),l:700})}}
-bindSwipe($('#screen'));bindSwipe($('#pad'));
+bindSwipe($('#screen'));
+/* the touch pad works like the real device: the pad is a little map of the screen.
+   Swipe it to clear dust. Otherwise slide to aim (a dot shows where you are) and let go to tap. */
+function padAt(e,el){const r=$('#pad').getBoundingClientRect(),m=.08,cl=v=>Math.min(1,Math.max(0,(v-m)/(1-2*m)));return[cl((e.clientX-r.left)/r.width)*63.9,cl((e.clientY-r.top)/r.height)*63.9]}
+(function bindPad(el){let down=false,last=null,dusty=false;
+el.addEventListener('pointerdown',e=>{e.preventDefault();down=true;try{el.setPointerCapture(e.pointerId)}catch(_){}ac();last=padAt(e,el);dusty=dustOn();S.cur={x:last[0],y:last[1],on:true,t:performance.now()};if(dusty)onTouch(last,true)});
+el.addEventListener('pointermove',e=>{if(!down)return;const p=padAt(e,el);S.cur.x=p[0];S.cur.y=p[1];if(dustOn()){const dx=p[0]-last[0],dy=p[1]-last[1],n=Math.max(1,Math.ceil(Math.hypot(dx,dy)/2));for(let i=1;i<=n;i++)onTouch([last[0]+dx*i/n,last[1]+dy*i/n],false)}last=p});
+const up=e=>{if(!down)return;down=false;S.cur.on=false;S.cur.t=performance.now();if(!dusty&&!dustOn()&&e.type=='pointerup')onTouch([S.cur.x,S.cur.y],true)};
+el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up)})($('.base'));
 
 function wake(){if(S.phase!='dust')return;S.phase='awake';S.wokeAt=performance.now();for(const d of dust){if(!d.gone){const a=Math.random()*6.28;d.vx+=Math.cos(a)*.6;d.vy+=Math.sin(a)*.6-.3}}
 S.ev={k:'ohhi',t:performance.now()+250,d:1600};setTimeout(()=>chirp(DEFAULT),650);
-$('#hint').textContent="Oh hi! He's never existed before.";$('#padTxt').textContent='tap him';$('#padTxt').style.opacity=1;
+$('#hint').textContent="Oh hi! He's never existed before.";$('#padTxt').textContent='slide, let go to tap';$('#padTxt').style.opacity=1;
 setTimeout(()=>{$('#pHello').classList.remove('hidden');$('#pHello').scrollIntoView({behavior:'smooth',block:'center'})},1300)}
 
 /* ---------- birth ---------- */
@@ -364,7 +374,7 @@ const id=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6);const
 try{await C.set('mote:'+id,rec)}catch(e){toast("He couldn't be saved just now. Try again?");$('#born').disabled=false;return}
 S.mine={id,...rec};show(S.mine,true);$('#pHello').classList.add('hidden');renderNursery()};
 $('#name').addEventListener('keydown',e=>{if(e.key=='Enter')$('#born').click()});
-let giftT;function show(rec,isBirth){if(S.br){S.br=null;S.steam=[];$('#padTxt').textContent='tap him'}S.scene='room';S.atticDust=false;S.rec=rec;const g=genome(rec.seed);S.g=g;S.shown=g;
+let giftT;function show(rec,isBirth){if(S.br){S.br=null;S.steam=[];$('#padTxt').textContent='slide, let go to tap'}S.scene='room';S.atticDust=false;S.rec=rec;const g=genome(rec.seed);S.g=g;S.shown=g;
 clearTimeout(giftT);if(isMine()&&!haveT(rec).includes('seashell'))giftT=setTimeout(()=>{if(S.scene=='room'&&!S.br)give('seashell')},isBirth?4500:3000);S.ev={k:isBirth?'born':'ohhi',t:performance.now(),d:isBirth?1400:1600};chirp(g);
 for(let i=0;i<40;i++)S.sparks.push({x:32,y:40,vx:Math.cos(i)*(.5+Math.random()),vy:Math.sin(i)*(.5+Math.random()),c:i%2?'#fff3b0':'#f6c945',t:performance.now(),l:900+Math.random()*600});
 S.certMode=isBirth===true?false:isBirth;renderCert(rec,g,isBirth);$('#hint').textContent=isBirth?`${rec.owner}'s Mote was just born.`:`Visiting ${rec.owner}'s Mote.`;}
