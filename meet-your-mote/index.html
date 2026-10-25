@@ -142,7 +142,7 @@ $('#snd').onclick=()=>{soundOn=!soundOn;$('#snd').textContent=soundOn?'♪ on':'
 const P={wall:'#e9d2a8',wall2:'#e2c899',beam:'#fff2c4',floor:'#c99a66',floor2:'#b9895a',win:'#bfe0ef',winf:'#a87447',
 b0:'#fffaf0',b1:'#fff2c6',b2:'#fbe39b',b3:'#f3cf76',edge:'#e6b955',eye:'#5a3a5e',blush:'#f2a39a',star:'#f6c945',star2:'#fff5c0',stem:'#e3b85a'};
 function px(x,c,X,Y,w=1,h=1){x.fillStyle=c;x.fillRect(X|0,Y|0,w,h)}
-/* the room, after Colette's sketch: big sunny window, shelves, bookshelf, a painting, and a cat asleep in a high-back chair */
+/* the room, after Haley's sketch: big sunny window, shelves, bookshelf, a painting, and a cat asleep in a high-back chair */
 const BOOKS=[[2,5,'#b85c4a'],[4,4,'#e0b04a'],[5,6,'#5f7f9e'],[7,5,'#7a9a5a'],[8,4,'#c98aa0'],[10,6,'#8a5a8e'],[12,5,'#d9a066']];
 function painting(x,fav){const X=18,Y=6;
 const F={'the ocean':()=>{px(x,'#bfe3f0',X,Y,12,4);px(x,'#4f8fbf',X,Y+4,12,6);px(x,'#e8f6fb',X+2,Y+5,3,1);px(x,'#e8f6fb',X+7,Y+7,3,1)},
@@ -169,7 +169,9 @@ px(x,'#9a6b3f',17,5,14,12);painting(x,g&&g.fav);px(x,'#c49a64',17,5,14,1);
 px(x,'#a87447',1,17,15,1);px(x,'#8a5a36',3,18,1,2);px(x,'#8a5a36',13,18,1,2);
 px(x,'#7fa7c9',2,12,3,5);px(x,'#7fa7c9',3,10,1,2);px(x,'#cfe3f3',2,13,1,2);px(x,'#4f7fb4',3,11,1,1);
 if(small||!(S&&S.br)){drawMug(x,8,17,1);/* shelf steam */for(let k=0;k<2;k++){const ph=(t/2600+k*.5)%1,sy=11-ph*7,sxx=7+k*2+Math.round(Math.sin(ph*6+k*2));x.globalAlpha=Math.sin(ph*Math.PI)*.75;px(x,'#fffaf0',sxx,sy,1,1);px(x,'#fffaf0',sxx+(ph>.5?1:-1)*0,sy+1,1,1);x.globalAlpha=1}}
-px(x,'#c0703f',12,15,3,2);px(x,'#7aa860',11,13,2,2);px(x,'#7aa860',14,12,1,3);px(x,'#9cc98a',12,12,1,1);
+px(x,'#c0703f',12,15,3,2);px(x,'#7aa860',11,13,2,2);if(!small&&isMine()&&!haveT(S.mine).includes('carrot')&&!S.br){const bob=(t%2400)<300?1:0;px(x,'#f08a3c',13,14-bob,1,1)}px(x,'#7aa860',14,12,1,3);px(x,'#9cc98a',12,12,1,1);
+/* the attic hatch in the ceiling, once he has his first topper */
+if(!small&&hatchOn()){px(x,'#8a5a36',2,0,13,3);px(x,'#a87447',3,0,11,2);px(x,'#c99a66',3,0,11,1);px(x,'#e0b04a',8,3,1,3);px(x,'#e0b04a',7,6,3,1);px(x,'#e0b04a',7,7,1,1);px(x,'#e0b04a',9,7,1,1);px(x,'#e0b04a',8,8,1,1)}
 /* bookshelf */
 px(x,'#8a5a36',1,24,15,24);px(x,'#5e3b22',2,25,13,22);px(x,'#8a5a36',2,32,13,1);px(x,'#8a5a36',2,39,13,1);
 for(const[r,top]of[[0,25],[1,33],[2,40]])for(const[bx,h,c]of BOOKS){if(r==1&&bx>=10)continue;if(r==2&&bx<5)continue;const hh=Math.min(h+(r==2?1:0),7);px(x,c,bx,top+7-hh,(bx==2||bx==8)?2:1,hh)}
@@ -198,7 +200,7 @@ px(x,'#7d9579',l+w,hy,hs*2,hs);px(x,'#7d9579',l+w+hs,hy,hs,hh);px(x,'#7d9579',l+
 const BR={down:1400,inh:4000,exh:4000,up:1300};
 const ease=u=>u<0?0:u>1?1:.5-.5*Math.cos(u*Math.PI);
 const MUG_SHELF=[8,17,1],MUG_FRONT=[32,57,2];
-function startBreath(){if(S.phase=='dust'||S.br)return;ac();S.br={phase:'down',t0:performance.now(),hint:$('#hint').textContent};S.steam=[];S.ev=null;
+function startBreath(){if(S.phase=='dust'||S.br)return;if(S.scene!='room')goRoom();ac();S.br={phase:'down',t0:performance.now(),hint:$('#hint').textContent};S.steam=[];S.ev=null;
 $('#hint').textContent="He's settling in…";$('#padTxt').textContent='tap to finish';$('#padTxt').style.opacity=1}
 function endBreath(){if(!S.br||S.br.phase=='up')return;S.br.phase='up';S.br.t2=performance.now();$('#hint').textContent=S.br.hint;$('#padTxt').textContent='tap him'}
 function mugAt(t){const b=S.br;let u,from,to;if(b.phase=='down'){u=ease((t-b.t0)/BR.down);from=MUG_SHELF;to=MUG_FRONT}else if(b.phase=='up'){u=ease((t-b.t2)/BR.up);from=MUG_FRONT;to=MUG_SHELF}else return{x:MUG_FRONT[0],y:MUG_FRONT[1]+Math.round(Math.sin(t/900)*.4),s:2};
@@ -207,7 +209,7 @@ const arc=Math.sin(u*Math.PI)*-6;return{x:from[0]+(to[0]-from[0])*u,y:from[1]+(t
 function breathAt(t){const c=(t-S.br.t1)%(BR.inh+BR.exh);return c<BR.inh?{k:'in',u:c/BR.inh}:{k:'out',u:(c-BR.inh)/BR.exh}}
 function breathState(t){const b=S.br,s={sq:.45,hop:0,eyes:'half',look:0,lean:0,glow:.55,puff:0};
 if(b.phase=='down'){const u=(t-b.t0)/BR.down;s.sq=Math.round(ease(u)*4)/4*.45;s.eyes=u<.3?'open':'half';if(u>=1){b.phase='on';b.t1=t}}
-else if(b.phase=='up'){const u=(t-b.t2)/BR.up;s.sq=.45*(1-ease(u));s.eyes=u>.6?'open':'half';if(u>=1){S.br=null;S.steam=[];s.eyes='open'}}
+else if(b.phase=='up'){const u=(t-b.t2)/BR.up;s.sq=.45*(1-ease(u));s.eyes=u>.6?'open':'half';if(u>=1){const did=b.t1&&b.t2-b.t1>2500;S.br=null;S.steam=[];s.eyes='open';if(did)setTimeout(()=>give('lotus'),600)}}
 else{const q=breathAt(t),e=ease(q.u);if(q.k=='in'){s.puff=e;s.sq=.45*(1-e);s.glow=.55+.45*e;s.eyes=e>.7?'closed':'half'}else{s.puff=1-e;s.sq=.45*e;s.glow=1-.45*e;s.eyes='half'}
 const w=q.k=='in'?'breathe in…':'…and slowly out';if($('#hint').textContent!=w)$('#hint').textContent=w}
 return s}
@@ -220,6 +222,28 @@ else{p.vy+=-.004;p.vx+=Math.cos(age/400+p.ph)*.02}
 p.vx*=.94;p.vy*=.95;p.x+=p.vx;p.y+=p.vy;if(p.y<36)p.l=Math.min(p.l,age+300)}
 S.steam=S.steam.filter(p=>t-p.b<p.l&&p.y<63);
 for(const p of S.steam){const a=Math.min(1,Math.sin(Math.min(1,(t-p.b)/p.l)*Math.PI)*1.3);p.tr.forEach(([x0,y0],i)=>{sx.globalAlpha=a*(i+1)/(p.tr.length+1)*.85;px(sx,'#fffaf0',x0,y0,1,1)});sx.globalAlpha=a;px(sx,'#fffaf0',p.x,p.y,1,1)}sx.globalAlpha=1}
+/* ---------- toppers: the little thing on his antenna. rows sy-1..sy+3, the bottom row sits on the stem ---------- */
+const TOPPERS={star:'star',seashell:'seashell',carrot:'carrot',lotus:'lotus flower'};
+const TOP_ORDER=['star','seashell','carrot','lotus'];
+function drawTopper(x,id,sx,sy){
+if(id=='seashell'){const c='#f6c7a8',d='#e3a07f';px(x,c,sx-1,sy-1,3,1);px(x,c,sx-2,sy,5,2);px(x,c,sx-1,sy+2,3,1);px(x,d,sx,sy+3,1,1);px(x,d,sx-1,sy,1,2);px(x,d,sx+1,sy,1,2);px(x,'#fde3d2',sx-2,sy,1,1);return}
+if(id=='carrot'){const o='#f08a3c';px(x,'#7aa860',sx-1,sy-1,1,1);px(x,'#9cc98a',sx,sy-1,1,1);px(x,'#7aa860',sx+1,sy-1,1,1);px(x,o,sx-1,sy,3,2);px(x,'#d06a28',sx+1,sy+1,1,1);px(x,o,sx,sy+2,1,2);return}
+if(id=='lotus'){const p='#f2a3b4';px(x,p,sx,sy-1,1,2);px(x,'#fbd3dc',sx,sy-1,1,1);px(x,p,sx-1,sy,1,2);px(x,p,sx+1,sy,1,2);px(x,p,sx-2,sy+1,1,1);px(x,p,sx+2,sy+1,1,1);px(x,'#f6d77a',sx,sy+1,1,1);px(x,'#7aa860',sx-2,sy+2,5,1);px(x,'#7aa860',sx,sy+3,1,1);return}
+px(x,P.star,sx-1,sy,3,3);px(x,P.star,sx,sy-1,1,5);px(x,P.star,sx-2,sy+1,5,1);px(x,P.star2,sx,sy+1,1,1)}
+/* the dusty attic: a slanted roof, a round window, a mirror, and a shelf that holds only the toppers he has */
+function drawAttic(x,t,have,wear){px(x,'#c49a6c',0,0,64,64);for(let i=3;i<64;i+=7)px(x,'#b78c5e',i,0,1,48);
+x.fillStyle='#7a5232';x.beginPath();x.moveTo(0,0);x.lineTo(25,0);x.lineTo(0,25);x.fill();x.beginPath();x.moveTo(39,0);x.lineTo(64,0);x.lineTo(64,25);x.fill();
+for(let k=0;k<25;k++){px(x,'#5e3b22',24-k,k,2,1);px(x,'#5e3b22',39+k,k,2,1)}
+x.fillStyle='#8a5a36';x.beginPath();x.arc(32,9,6,0,6.283);x.fill();x.fillStyle='#bfe0ef';x.beginPath();x.arc(32,9,4.6,0,6.283);x.fill();px(x,'#d8eef6',29,6,6,2);px(x,'#8a5a36',32,4,1,10);px(x,'#8a5a36',27,9,10,1);
+x.globalAlpha=.32;x.fillStyle='#fff6d6';x.beginPath();x.moveTo(28,14);x.lineTo(36,14);x.lineTo(46,50);x.lineTo(18,50);x.fill();x.globalAlpha=1;
+px(x,'#c9902f',48,22,11,26);px(x,'#e0b04a',49,23,9,24);px(x,'#cfe6f0',50,24,7,22);px(x,'#eef8fb',51,25,1,6);px(x,'#eef8fb',52,25,1,3);
+px(x,'#8a5a36',2,30,22,1);px(x,'#5e3b22',4,31,1,2);px(x,'#5e3b22',21,31,1,2);
+px(x,'#8a5a36',3,40,12,8);px(x,'#a87447',3,40,12,2);px(x,'#e0b04a',8,42,2,2);px(x,'#5e3b22',3,44,12,1);
+px(x,'#a87447',0,48,64,16);for(let i=0;i<64;i+=9)px(x,'#8a5a36',i,48,1,16);px(x,'#8a5a36',0,48,64,1);
+px(x,'#5e3b22',2,53,13,8);px(x,'#3e2716',3,54,11,6);px(x,'#c99a66',5,54,1,6);px(x,'#c99a66',11,54,1,6);for(let k=55;k<60;k+=2)px(x,'#c99a66',5,k,7,1);
+TOP_ORDER.filter(id=>have.includes(id)).forEach((id,i)=>{const cx=5+i*5;if(id==wear){x.globalAlpha=.4;px(x,'#fff3b0',cx-3,23,7,7);x.globalAlpha=1}drawTopper(x,id,cx,26)});
+x.fillStyle='#fffbe8';for(let i=0;i<6;i++){const ph=(t/9000+i*.17)%1;x.globalAlpha=Math.sin(ph*Math.PI)*.8;x.fillRect((24+i*3+Math.sin(t/1400+i)*2)|0,(15+ph*33)|0,1,1)}x.globalAlpha=1}
+function atticSlots(have){return TOP_ORDER.filter(id=>have.includes(id)).map((id,i)=>({id,cx:5+i*5}))}
 /* Mote: a wide, limbless glowing dumpling. st = {sq:squash(-1..1), hop:px up, eyes:'open'|'closed'|'half'|'wow', look:-1..1, lean:-1..1, glow:0..1} */
 function drawMote(x,cx,base,st){const sq=st.sq||0,pf=st.puff||0,rx=13*(1+sq*.18)*(1+pf*.07),ry=9*(1-sq*.22)*(1+pf*.16),cy=base-ry-(st.hop||0);
 const g=st.glow??.6;x.globalAlpha=.18+g*.12;x.fillStyle='#fff3b0';x.beginPath();x.ellipse(cx,cy,rx+5,ry+5,0,0,6.283);x.fill();x.globalAlpha=.08+g*.08;x.beginPath();x.ellipse(cx,cy,rx+7,ry+6,0,0,6.283);x.fill();x.globalAlpha=1;
@@ -229,7 +253,7 @@ const band=dy<-.55?P.b0:dy<-.15?P.b1:dy<.3?P.b2:P.b3;x.fillStyle=band;x.fillRect
 x.fillStyle=P.edge;x.fillRect(Math.round(cx-rx*.85),Math.round(cy+ry)-1,Math.round(rx*1.7),1);
 x.fillStyle='#ffffff';x.globalAlpha=.7;x.fillRect(Math.round(cx-rx*.45),Math.round(cy-ry*.7),3,1);x.globalAlpha=1;
 const lean=(st.lean||0),sx=Math.round(cx+lean),top=Math.round(cy-ry);px(x,P.stem,sx,top-6,1,6);
-const sy=top-9;px(x,P.star,sx-1,sy,3,3);px(x,P.star,sx,sy-1,1,5);px(x,P.star,sx-2,sy+1,5,1);px(x,P.star2,sx,sy+1,1,1);
+drawTopper(x,st.topper||'star',sx,top-9);
 const ex=Math.round(cx+(st.look||0)),ey=Math.round(cy-1),L=ex-5,R=ex+3;const e=st.eyes||'open';
 if(e=='closed'){px(x,P.eye,L,ey+1,3,1);px(x,P.eye,R,ey+1,3,1)}else if(e=='half'){px(x,P.eye,L,ey+1,3,2);px(x,P.eye,R,ey+1,3,2)}
 else{const h=e=='wow'?4:3;px(x,P.eye,L,ey-1,3,h);px(x,P.eye,R,ey-1,3,h);px(x,'#fff',L,ey-1,1,1);px(x,'#fff',R,ey-1,1,1);px(x,'#fff',L+2,ey+1,1,1);px(x,'#fff',R+2,ey+1,1,1)}
@@ -248,12 +272,31 @@ case 4:break;
 case 5:s.lean=g.tilt*2;s.look=g.tilt;break}
 if(ev){const u=(t-ev.t)/ev.d;if(u<1){if(ev.k=='ohhi'){if(u<.15)s.sq=.6*(u/.15);else if(u<.45){const v=(u-.15)/.3;s.hop=Math.round(Math.sin(v*Math.PI)*12*(g.bounce||1));s.sq=-.5*Math.sin(v*Math.PI)}else if(u<.62)s.sq=.7*Math.sin((u-.45)/.17*Math.PI);s.eyes=u>.15&&u<.6?'wow':'open';s.glow=1}
 else if(ev.k=='tap'){const sh=g.temps.includes('shy'),bo=g.temps.includes('bouncy')||g.temps.includes('giggly');if(sh){s.sq=.5*Math.sin(u*Math.PI);s.eyes='closed'}else{s.hop=Math.round(Math.sin(u*Math.PI)*(bo?10:5)*g.bounce);s.sq=-.3*Math.sin(u*Math.PI);s.eyes='wow'}s.glow=1}
+else if(ev.k=='wow'){s.eyes='wow';s.glow=1;s.look=0;s.lean=0;if(u<.3){const v=u/.3;s.hop=Math.round(Math.sin(v*Math.PI)*6);s.sq=-.4*Math.sin(v*Math.PI)}}
 else if(ev.k=='born'){s.glow=1;s.eyes=u<.5?'wow':'open';s.hop=Math.round(Math.sin(u*Math.PI*2)*3)}}}
 return s}
 
 /* ---------- the main screen ---------- */
 const scr=$('#scr'),sx=scr.getContext('2d');sx.imageSmoothingEnabled=false;
-const S={phase:'dust',g:null,ev:null,mine:null,shown:null,notes:[],sparks:[]};
+const S={phase:'dust',g:null,ev:null,mine:null,shown:null,rec:null,scene:'room',atticDust:false,notes:[],sparks:[]};
+const isMine=()=>!!(S.mine&&S.rec&&S.rec.seed==S.mine.seed);
+const haveT=r=>['star',...((r&&r.toppers)||[]).filter(k=>TOPPERS[k]&&k!='star')];
+const wearT=r=>(r&&TOPPERS[r.wear])?r.wear:'star';
+function hatchOn(){return isMine()&&haveT(S.mine).length>1}
+const dustOn=()=>S.phase=='dust'||S.atticDust;
+function saveMine(){const{id,...r}=S.mine;return C.set('mote:'+id,r).catch(()=>{})}
+/* a topper arrives: it pops onto his antenna and he makes a "wow" face */
+function give(id){if(!isMine()||haveT(S.mine).includes(id))return false;const first=haveT(S.mine).length==1;
+S.mine.toppers=[...((S.mine.toppers)||[]),id];S.mine.wear=id;S.rec=S.mine;saveMine();
+S.ev={k:'wow',t:performance.now(),d:1600};chirp(S.shown||DEFAULT);
+for(let i=0;i<26;i++)S.sparks.push({x:32,y:26,vx:Math.cos(i)*(.4+Math.random()*.6),vy:Math.sin(i)*(.4+Math.random()*.6),c:i%2?'#fff3b0':'#f6c945',t:performance.now(),l:800+Math.random()*500});
+toast(`Ooh, a ${TOPPERS[id]}! He's wearing it.`+(first?' A little hatch just appeared in his ceiling.':''),first?4200:2800);
+if(S.g)renderCert(S.mine,S.g,S.certMode);return true}
+function goAttic(){if(!hatchOn()||S.br)return;S.scene='attic';$('#padTxt').textContent='tap him';
+if(!S.mine.attic){makeDust();S.atticDust=true;S.wokeAt=null;$('#hint').textContent='The attic is so dusty. Clear it off.'}else $('#hint').textContent='The dusty attic. Tap a topper to try it on.'}
+function atticClear(){S.atticDust=false;S.wokeAt=performance.now();S.atticAt=S.wokeAt;for(const d of dust){if(!d.gone){const a=Math.random()*6.28;d.vx+=Math.cos(a)*.6;d.vy+=Math.sin(a)*.6-.3}}
+S.mine.attic=true;saveMine();S.ev={k:'ohhi',t:performance.now()+200,d:1600};setTimeout(()=>chirp(S.shown||DEFAULT),550);$('#hint').textContent='The dusty attic. Tap a topper to try it on.'}
+function goRoom(){S.scene='room';S.atticDust=false;$('#hint').textContent=isMine()?(S.mine.owner+"'s Mote is home."):$('#hint').textContent}
 const DEFAULT={seed:1,temps:['curious','gentle'],habit:4,blink:3.5,bounce:1,breath:4.4,tilt:1,chirp:{base:700,notes:[0,4,7],wave:'sine',gap:.1,glide:1.08}};
 /* dust */
 let dust=[];function makeDust(){dust=[];const cols=['#b9ad99','#cfc4b0','#a89c88','#d9cfbd','#968a77'];for(let i=0;i<2300;i++)dust.push({x:Math.random()*64,y:Math.random()*64,vx:0,vy:0,c:cols[(Math.random()*cols.length)|0],s:Math.random()<.3?2:1,dw:Math.random()*6.28,gone:false})}
@@ -262,8 +305,9 @@ let ptr=null;function scatter(px_,py_){let n=0;for(const d of dust){if(d.gone)co
 function dustLeft(){let n=0;for(const d of dust)if(!d.gone&&d.x>=0&&d.x<64&&d.y>=0&&d.y<64)n++;return n/dust.length}
 let dustTick=0;
 function frame(t){sx.clearRect(0,0,64,64);
-const g=S.shown||(S.phase=='dust'?null:DEFAULT);drawRoom(sx,t,false,S.shown);
-if(S.phase!='dust'||dustLeft()<.97){const st=S.br?breathState(t):moteState(g||DEFAULT,t,S.ev);drawMote(sx,32,49,st)}
+const g=S.shown||(S.phase=='dust'?null:DEFAULT);
+if(S.scene=='attic')drawAttic(sx,t,haveT(S.mine),wearT(S.mine));else drawRoom(sx,t,false,S.shown);
+if(S.phase!='dust'||dustLeft()<.97){const st=S.br?breathState(t):moteState(g||DEFAULT,t,S.ev);st.topper=wearT(S.rec);drawMote(sx,32,49,st)}
 if(S.br){const m=mugAt(t);drawMug(sx,m.x,m.y,m.s);steamStep(t,m)}
 /* hum notes for hummers */
 if(g&&g.habit==4&&S.phase!='dust'&&!S.br){if(Math.random()<.008)S.notes.push({x:40,y:30,t});S.notes=S.notes.filter(n=>t-n.t<2600);for(const n of S.notes){const u=(t-n.t)/2600;sx.globalAlpha=1-u;px(sx,'#8a6a9e',n.x+Math.sin(u*6)*2,n.y-u*16,1,3);px(sx,'#8a6a9e',n.x+Math.sin(u*6)*2,n.y-u*16+2,2,1);sx.globalAlpha=1}}
@@ -271,11 +315,12 @@ if(g&&g.habit==3&&S.phase!='dust'&&!S.br){const k=(t/1000%14)/14;if(k>.55&&k<.9)
 /* sparkles */
 S.sparks=S.sparks.filter(p=>t-p.t<p.l);for(const p of S.sparks){const u=(t-p.t)/p.l;sx.globalAlpha=1-u;px(sx,p.c,p.x+p.vx*u*20,p.y+p.vy*u*20,1,1);sx.globalAlpha=1}
 /* dust on top */
-if(S.phase=='dust'||dust.some(d=>!d.gone)){for(const d of dust){if(d.gone)continue;d.x+=d.vx;d.y+=d.vy;d.vx*=.88;d.vy*=.88;
-if(S.phase!='dust'){d.vy+=.09;d.vx+=(Math.random()-.5)*.08;d.vx*=1.08;d.vy*=1.08}
+if(dustOn()||dust.some(d=>!d.gone)){for(const d of dust){if(d.gone)continue;d.x+=d.vx;d.y+=d.vy;d.vx*=.88;d.vy*=.88;
+if(!dustOn()){d.vy+=.09;d.vx+=(Math.random()-.5)*.08;d.vx*=1.08;d.vy*=1.08}
 if(d.x<-3||d.x>67||d.y<-3||d.y>67){d.gone=true;continue}
 const wob=Math.sin(t/900+d.dw)*.15;const fa=S.wokeAt?Math.max(0,1-(t-S.wokeAt)/1400):1;if(fa<=0){d.gone=true;continue}sx.globalAlpha=fa;sx.fillStyle=d.c;sx.fillRect((d.x+wob)|0,d.y|0,d.s,d.s);sx.globalAlpha=1}}
 if(S.phase=='dust'&&++dustTick%10==0&&dustLeft()<.32)wake();
+if(S.atticDust&&++dustTick%10==0&&dustLeft()<.32)atticClear();
 requestAnimationFrame(frame)}
 requestAnimationFrame(frame);
 
@@ -284,10 +329,15 @@ function bindSwipe(el){let down=false,last=null;
 el.addEventListener('pointerdown',e=>{down=true;el.setPointerCapture(e.pointerId);last=toLocal(e,el);ac();onTouch(last,true)});
 el.addEventListener('pointermove',e=>{if(!down)return;const p=toLocal(e,el);const dx=p[0]-last[0],dy=p[1]-last[1],dist=Math.hypot(dx,dy),n=Math.max(1,Math.ceil(dist/2));for(let i=1;i<=n;i++)onTouch([last[0]+dx*i/n,last[1]+dy*i/n],false);last=p});
 el.addEventListener('pointerup',()=>down=false);el.addEventListener('pointercancel',()=>down=false)}
-function onTouch(p,first){if(S.phase=='dust'){scatter(p[0],p[1]);$('#padTxt').style.opacity=0;return}
+function onTouch(p,first){if(dustOn()){scatter(p[0],p[1]);$('#padTxt').style.opacity=0;return}
 if(S.br){if(first)endBreath();return}
-if(first&&p[0]>=3&&p[0]<=14&&p[1]>=7&&p[1]<=19){startBreath();return}
-if(first&&p[0]>46&&p[1]>30&&p[1]<50){S.cat=performance.now();mrrp()}else if(first&&Math.abs(p[0]-32)<16&&p[1]>28&&p[1]<54){S.ev={k:'tap',t:performance.now(),d:700};chirp(S.shown||DEFAULT)}else if(first){for(let i=0;i<6;i++)S.sparks.push({x:p[0],y:p[1],vx:Math.random()-.5,vy:Math.random()-.5,c:'#fff3b0',t:performance.now(),l:700})}}
+if(S.scene=='attic'&&first){if(S.atticAt&&performance.now()-S.atticAt<900)return;if(p[0]>=1&&p[0]<=16&&p[1]>=51){goRoom();return}
+const sl=atticSlots(haveT(S.mine)).find(s=>Math.abs(p[0]-s.cx)<=2.6&&p[1]>=22&&p[1]<=31);
+if(sl){if(S.mine.wear!=sl.id||!S.mine.wear){S.mine.wear=sl.id;S.rec=S.mine;saveMine();S.ev={k:'wow',t:performance.now(),d:1100};chirp(S.shown||DEFAULT);for(let i=0;i<12;i++)S.sparks.push({x:32,y:26,vx:Math.cos(i)*.6,vy:Math.sin(i)*.6,c:'#fff3b0',t:performance.now(),l:700});renderCert(S.mine,S.g,S.certMode)}return}}
+if(S.scene=='room'&&first&&hatchOn()&&p[0]>=1&&p[0]<=15&&p[1]<9.5){goAttic();return}
+if(S.scene=='room'&&first&&p[0]>=10.5&&p[0]<=15.5&&p[1]>=10&&p[1]<=18&&isMine()){if(!give('carrot'))for(let i=0;i<6;i++)S.sparks.push({x:13,y:13,vx:Math.random()-.5,vy:-Math.random(),c:'#9cc98a',t:performance.now(),l:600});else for(let i=0;i<10;i++)S.sparks.push({x:13,y:13,vx:Math.random()-.5,vy:-Math.random(),c:'#f08a3c',t:performance.now(),l:800});return}
+if(S.scene=='room'&&first&&p[0]>=3&&p[0]<=10.5&&p[1]>=7&&p[1]<=19){startBreath();return}
+if(S.scene=='room'&&first&&p[0]>46&&p[1]>30&&p[1]<50){S.cat=performance.now();mrrp()}else if(first&&Math.abs(p[0]-32)<16&&p[1]>28&&p[1]<54){S.ev={k:'tap',t:performance.now(),d:700};chirp(S.shown||DEFAULT)}else if(first){for(let i=0;i<6;i++)S.sparks.push({x:p[0],y:p[1],vx:Math.random()-.5,vy:Math.random()-.5,c:'#fff3b0',t:performance.now(),l:700})}}
 bindSwipe($('#screen'));bindSwipe($('#pad'));
 
 function wake(){if(S.phase!='dust')return;S.phase='awake';S.wokeAt=performance.now();for(const d of dust){if(!d.gone){const a=Math.random()*6.28;d.vx+=Math.cos(a)*.6;d.vy+=Math.sin(a)*.6-.3}}
@@ -305,22 +355,23 @@ const id=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6);const
 try{await C.set('mote:'+id,rec)}catch(e){toast("He couldn't be saved just now. Try again?");$('#born').disabled=false;return}
 S.mine={id,...rec};show(S.mine,true);$('#pHello').classList.add('hidden');renderNursery()};
 $('#name').addEventListener('keydown',e=>{if(e.key=='Enter')$('#born').click()});
-function show(rec,isBirth){if(S.br){S.br=null;S.steam=[];$('#padTxt').textContent='tap him'}const g=genome(rec.seed);S.g=g;S.shown=g;S.ev={k:isBirth?'born':'ohhi',t:performance.now(),d:isBirth?1400:1600};chirp(g);
+let giftT;function show(rec,isBirth){if(S.br){S.br=null;S.steam=[];$('#padTxt').textContent='tap him'}S.scene='room';S.atticDust=false;S.rec=rec;const g=genome(rec.seed);S.g=g;S.shown=g;
+clearTimeout(giftT);if(isMine()&&!haveT(rec).includes('seashell'))giftT=setTimeout(()=>{if(S.scene=='room'&&!S.br)give('seashell')},isBirth?4500:3000);S.ev={k:isBirth?'born':'ohhi',t:performance.now(),d:isBirth?1400:1600};chirp(g);
 for(let i=0;i<40;i++)S.sparks.push({x:32,y:40,vx:Math.cos(i)*(.5+Math.random()),vy:Math.sin(i)*(.5+Math.random()),c:i%2?'#fff3b0':'#f6c945',t:performance.now(),l:900+Math.random()*600});
-renderCert(rec,g,isBirth);$('#hint').textContent=isBirth?`${rec.owner}'s Mote was just born.`:`Visiting ${rec.owner}'s Mote.`;}
+S.certMode=isBirth===true?false:isBirth;renderCert(rec,g,isBirth);$('#hint').textContent=isBirth?`${rec.owner}'s Mote was just born.`:`Visiting ${rec.owner}'s Mote.`;}
 function idxOf(rec){const l=Object.values(MOTES).sort((a,b)=>a.at-b.at);const i=l.findIndex(m=>m.seed==rec.seed);return i<0?l.length:i+1}
 function renderCert(rec,g,isBirth){const mine=S.mine&&S.mine.seed==rec.seed;const el=$('#pCert');el.classList.remove('hidden');
 el.innerHTML=`<h2>${mine?'Your':esc(rec.owner)+'’s'} Mote${rec.kind=='agent'?'<span class="badge">agent</span>':''}</h2>
 <div class="code">${g.code}</div><div class="meta" style="color:var(--soft);font-size:13px">Mote no. ${idxOf(rec)} · born ${new Date(rec.at).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}${mine?'':' · for '+esc(rec.owner)}</div>
 <div class="dna" aria-label="genome strip">${g.dna.map(d=>`<i style="background:${DNA_COLORS[d]}"></i>`).join('')}</div>
-<div class="traits"><b>nature</b><span>${g.temps[0]} and ${g.temps[1]}</span><b>habit</b><span>${HABITS[g.habit]}</span><b>favourite</b><span>${g.fav} (there's a painting of it on his wall)</span><b>breathes</b><span>every ${g.breath.toFixed(1)} seconds</span><b>blinks</b><span>every ${g.blink.toFixed(1)} seconds</span><b>voice</b><span>${g.chirp.notes.length}-note chirp, ${g.chirp.base<700?'low and soft':g.chirp.base<900?'sweet and middling':'high and bright'}</span></div>
+<div class="traits"><b>nature</b><span>${g.temps[0]} and ${g.temps[1]}</span><b>habit</b><span>${HABITS[g.habit]}</span><b>favourite</b><span>${g.fav} (there's a painting of it on his wall)</span><b>breathes</b><span>every ${g.breath.toFixed(1)} seconds</span><b>blinks</b><span>every ${g.blink.toFixed(1)} seconds</span><b>voice</b><span>${g.chirp.notes.length}-note chirp, ${g.chirp.base<700?'low and soft':g.chirp.base<900?'sweet and middling':'high and bright'}</span><b>topper</b><span>wearing a ${TOPPERS[wearT(rec)]}${haveT(rec).length>1?' · has '+haveT(rec).map(k=>TOPPERS[k]).join(', '):''}</span></div>${mine&&haveT(rec).length>1?'<p style="font-size:13px;color:var(--soft);margin:8px 0 0">Tap the hatch in his ceiling to visit the dusty attic and try on his toppers.</p>':''}
 <div class="row"><button class="btn" id="hear">hear his chirp ♪</button><button class="btn" id="breatheBtn">breathe with him ☕</button>${mine?'':'<button class="btn ghost" id="backMine">'+(S.mine?'back to mine':'meet your own')+'</button>'}</div>
 <p class="once">${mine?'There will never be another one like him.':'One of a kind, like all of them.'}</p>
 ${mine&&isBirth!==null?`<div class="want"><p>Honest question: would you want a real one, a tiny compact you carry, with your Mote inside?</p><div class="row" id="wantRow"><button class="btn" data-w="yes">yes please</button><button class="btn" data-w="maybe">maybe</button><button class="btn" data-w="no">not for me</button></div></div>`:''}`;
 $('#hear').onclick=()=>{ac();chirp(g);S.ev={k:'tap',t:performance.now(),d:700}};
 $('#breatheBtn').onclick=()=>{window.scrollTo({top:0,behavior:'smooth'});startBreath()};
 const bm=$('#backMine');if(bm)bm.onclick=()=>{if(S.mine)show(S.mine,false);else{$('#pCert').classList.add('hidden');S.shown=null;$('#pHello').classList.remove('hidden');$('#hint').textContent='Meet your own Mote.'}window.scrollTo({top:0,behavior:'smooth'})};
-const wr=$('#wantRow');if(wr)wr.querySelectorAll('button').forEach(b=>b.onclick=async()=>{wr.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x==b));try{await C.set('mote:'+S.mine.id,{owner:S.mine.owner,kind:'human',seed:S.mine.seed,at:S.mine.at,want:b.dataset.w});toast(b.dataset.w=='yes'?'Noted, thank you! ✦':'Thank you for telling us.')}catch(e){}});
+const wr=$('#wantRow');if(wr)wr.querySelectorAll('button').forEach(b=>b.onclick=async()=>{wr.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x==b));try{S.mine.want=b.dataset.w;await saveMine();toast(b.dataset.w=='yes'?'Noted, thank you! ✦':'Thank you for telling us.')}catch(e){}});
 if(isBirth)el.scrollIntoView({behavior:'smooth',block:'start'})}
 
 /* ---------- find an existing Mote ---------- */
@@ -340,10 +391,10 @@ const box=$('#nursery');box.innerHTML='';thumbs=[];
 for(const m of list.slice(0,NSHOW)){const g=genome(m.seed);const d=document.createElement('div');d.className='nm';d.tabIndex=0;d.setAttribute('role','button');d.setAttribute('aria-label',`${m.owner}'s Mote`);
 d.innerHTML=`<canvas width="64" height="64"></canvas><div class="who">${esc(m.owner)}${m.kind=='agent'?'<span class="badge">agent</span>':''}</div><div class="cd">${g.code}</div>`;
 const go=()=>{show(m,false);window.scrollTo({top:0,behavior:'smooth'})};d.onclick=go;d.onkeydown=e=>{if(e.key=='Enter')go()};
-box.appendChild(d);const cx=d.querySelector('canvas').getContext('2d');cx.imageSmoothingEnabled=false;thumbs.push({cx,g,off:Math.random()*5000})}
+box.appendChild(d);const cx=d.querySelector('canvas').getContext('2d');cx.imageSmoothingEnabled=false;thumbs.push({cx,g,w:m.wear,off:Math.random()*5000})}
 $('#more').classList.toggle('hidden',list.length<=NSHOW)}
 $('#more').onclick=()=>{NSHOW+=12;renderNursery()};
-(function thumbLoop(t){for(const th of thumbs){const x=th.cx;drawRoom(x,t,true,th.g);drawMote(x,32,49,moteState(th.g,t+th.off,null))}requestAnimationFrame(thumbLoop)})(0);
+(function thumbLoop(t){for(const th of thumbs){const x=th.cx;drawRoom(x,t,true,th.g);{const st=moteState(th.g,t+th.off,null);st.topper=TOPPERS[th.w]?th.w:'star';drawMote(x,32,49,st)}}requestAnimationFrame(thumbLoop)})(0);
 
 let chT;C.onChange(()=>{clearTimeout(chT);chT=setTimeout(renderNursery,700)});
 renderNursery();
